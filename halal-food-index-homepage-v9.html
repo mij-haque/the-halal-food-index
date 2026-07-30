@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Halal Food Index — Verified halal food in Manchester</title>
+<meta name="description" content="Your trusted guide to halal restaurants, takeaways and cafés across every borough of Greater Manchester. Every listing checked and dated.">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Halal Food Index">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://thehalalfoodindex.co.uk/">
+<meta property="og:title" content="Discover the Best Halal Food in Manchester">
+<meta property="og:description" content="Your trusted guide to halal restaurants, takeaways and cafés across every borough.">
+<meta property="og:image" content="https://thehalalfoodindex.co.uk/api/og?type=home">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Halal Food Index — Discover the Best Halal Food in Manchester">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Discover the Best Halal Food in Manchester">
+<meta name="twitter:description" content="Your trusted guide to halal restaurants, takeaways and cafés across every borough.">
+<meta name="twitter:image" content="https://thehalalfoodindex.co.uk/api/og?type=home">
+<link rel="canonical" href="https://thehalalfoodindex.co.uk/">
+<meta name="theme-color" content="#0B6B45">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  /* ground */
+  --bg:#FCFCFC;
+  --band:#FFFFFF;
+  --surface:#FFFFFF;
+  --hair:#E4E4E4;
+  --border:#E9E9E9;
+  --divider:#F1F1F1;
+  --text:#0F0F0F;
+  --t2:#51514E;
+  --t3:#8C8C89;
+  --pill:#EFEFEF;
+
+  /* ── three-tier colour ──
+     semantic green carries meaning: open now, halal, verified
+     ornamental green and brass carry care, never information   */
+  --green:#0B8F5A;      --green-bg:#E4F4EC;
+  --orn:#0B6B45;
+  --brass:#B8924E;
+
+  --amber:#B06005;--amber-bg:#FBF0E0;
+  --red:#C02929;--red-bg:#FAEAEA;
+  --link:#1F56BA;
+
+  --r:12px;
+  --tap:44px;
+}
+
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Instrument Sans',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:none}
+
+/* accessibility — focus rings for keyboard only */
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--text);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:12px;top:-60px;z-index:300;background:var(--text);color:#fff;
+  padding:11px 18px;border-radius:9px;font-size:14px;font-weight:600;transition:top .16s}
+.skip:focus{top:12px}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* type scale — Bricolage is the display voice, Instrument Sans is content */
+.display-xl{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+  font-size:clamp(32px,5.4vw,56px);letter-spacing:-2.2px;line-height:1.04;font-variation-settings:'opsz' 96}
+.display-md{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+  font-size:28px;letter-spacing:-1.15px;line-height:1.12;font-variation-settings:'opsz' 40}
+.display-fig{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-variation-settings:'opsz' 96}
+.display-sm{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+  letter-spacing:-.4px;font-variation-settings:'opsz' 16}
+
+/* ── logo lockup: dense seal, dominant wordmark ── */
+/* one lockup, used identically in header, footer and menu.
+   flex-shrink:0 on both halves so a narrow column can never
+   compress the seal or squeeze the wordmark. */
+.logo{display:inline-flex;align-items:center;gap:10px;white-space:nowrap}
+.logo>span:first-child{display:flex;flex-shrink:0}
+.logo svg{display:block;flex-shrink:0}
+.logo .wm{flex-shrink:0}
+.logo .wm{display:flex;flex-direction:column;gap:1px;line-height:1}
+.logo .wm .k{font-size:8.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--t3)}
+.logo .wm .m{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;
+  letter-spacing:-.6px;font-variation-settings:'opsz' 16;line-height:1}
+
+/* ── header lockup: wordmark sits on the nav line ──
+   The kicker is lifted out of the flow, so the lockup's box height is the
+   wordmark alone. Everything then centres naturally and "Halal Food Index"
+   lands on exactly the same line as the nav links — no nudge, nothing that
+   breaks when the type or the bar height changes. The footer keeps the
+   kicker in normal flow, since there is nothing there to align against. */
+header.top .logo .wm{display:block;position:relative}
+header.top .logo .wm .k{position:absolute;left:0;bottom:calc(100% + 3px);white-space:nowrap}
+header.top .logo .wm .m{display:block}
+
+/* header */
+header.top{position:sticky;top:0;z-index:70;background:var(--band);
+  border-bottom:1px solid transparent;transition:border-color .2s}
+header.top.stuck{border-bottom-color:var(--hair)}
+.top-in{max-width:1180px;margin:0 auto;padding:0 28px;height:64px;display:flex;align-items:center;gap:26px}
+.top-nav{display:flex;gap:22px}
+.top-nav a{font-size:13.5px;font-weight:500;color:var(--t2);transition:color .13s}
+.top-nav a:hover{color:var(--text)}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.iconbtn{width:var(--tap);height:var(--tap);border-radius:10px;border:1px solid var(--border);
+  background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--t2);transition:border-color .13s,color .13s}
+.iconbtn:hover{border-color:var(--t3);color:var(--text)}
+.iconbtn svg{width:17px;height:17px}
+.burger{display:none}
+
+/* sections */
+section{padding:56px 28px}
+.inner{max-width:1180px;margin:0 auto}
+section.band{background:var(--band);border-top:1px solid var(--hair);--surface:#FAFAFA;--border:#E6E6E6}
+section.band + section.band{border-top:none}
+section.band.last{border-bottom:1px solid var(--hair)}
+
+/* the brass ornament is retired from the homepage — it was decoration
+   rather than structure, and a page that doesn't miss it doesn't need it.
+   Kept in the stylesheet for chain pages, the verification page and email. */
+.orn{width:196px;height:22px;overflow:hidden;margin-bottom:18px}
+.orn svg{width:100%;height:100%;display:block}
+
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:5px}
+.sec-h a{font-size:13.5px;font-weight:600;color:var(--link);white-space:nowrap}
+.sec-s{font-size:14.5px;color:var(--t2);margin-bottom:26px;max-width:560px}
+
+/* hero */
+.hero{text-align:center;padding:80px 28px 62px;background:var(--band)}
+.hero h1{margin-bottom:18px}
+.hero .lede{font-size:16.5px;color:var(--t2);line-height:1.55;max-width:540px;margin:0 auto}
+.trigger{margin:36px auto 0;width:100%;max-width:428px;min-height:var(--tap);
+  display:flex;align-items:center;gap:11px;background:var(--pill);
+  border:1px solid transparent;border-radius:100px;padding:14px 22px;cursor:text;text-align:left;
+  transition:background .16s}
+.trigger:hover{background:#E9E9E9}
+.trigger>svg{flex-shrink:0;color:var(--t3);width:17px;height:17px}
+.roll{position:relative;height:1.42em;overflow:hidden;flex:1;font-size:15px;color:var(--t3);min-width:0}
+.roll span{position:absolute;left:0;right:0;top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:transform .44s cubic-bezier(.32,.72,0,1),opacity .44s cubic-bezier(.32,.72,0,1)}
+.roll span.out{transform:translateY(-100%);opacity:0}
+.roll span.in{transform:translateY(100%);opacity:0;transition:none}
+
+/* cuisine tiles */
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.tile{position:relative;aspect-ratio:5/4;border-radius:var(--r);overflow:hidden;display:block;
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),box-shadow .18s}
+.tile:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(15,15,15,.09)}
+.tile .art{position:absolute;inset:0;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 42%,rgba(0,0,0,.12) 78%,rgba(0,0,0,0) 96%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 42%,rgba(0,0,0,.12) 78%,rgba(0,0,0,0) 96%)}
+.tile .art svg{width:100%;height:100%;display:block}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:12px 13px}
+.tile .cap b{display:block;font-size:15.5px;line-height:1.15}
+.tile .cap span{display:block;font-size:11.5px;font-weight:600;color:var(--t2);margin-top:2px}
+
+/* filters */
+.frow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+.fchip{display:inline-flex;align-items:center;gap:7px;min-height:var(--tap);padding:0 17px;
+  background:var(--surface);border:1px solid var(--border);border-radius:100px;
+  font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;
+  transition:border-color .14s,background .14s,color .14s}
+.fchip:hover{border-color:var(--t3)}
+.fchip.live{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.fchip .d{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* venue cards */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:17px;display:flex;gap:13px;min-height:132px;
+  transition:border-color .15s,box-shadow .15s,transform .15s}
+.card:hover{border-color:#D8D8D8;box-shadow:0 3px 13px rgba(15,15,15,.06);transform:translateY(-2px)}
+.card .sw{width:44px;height:44px;border-radius:9px;flex-shrink:0;overflow:hidden}
+.card .sw svg{width:100%;height:100%;display:block}
+.card .cb{display:flex;flex-direction:column;flex:1;min-width:0}
+.kick{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.cname{font-size:15.5px;font-weight:700;letter-spacing:-.4px;line-height:1.22;margin-bottom:auto}
+.cmeta{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--t2);flex-wrap:wrap}
+.cmeta .score{font-size:13.5px;font-weight:700;color:var(--text)}
+.open{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--green)}
+.open::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.shut{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--t3)}
+.shut::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.cver{font-size:12px;font-weight:600;color:var(--link);margin-top:4px}
+
+/* verification */
+.trust{display:grid;grid-template-columns:1fr 1.05fr;gap:38px;align-items:center}
+.trust h2{margin-bottom:14px}
+.trust p{font-size:15px;color:var(--t2);line-height:1.7;margin-bottom:20px;max-width:450px}
+.how{display:flex;flex-direction:column;gap:10px}
+.how div{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;color:var(--t2);line-height:1.55}
+.how svg{width:15px;height:15px;flex-shrink:0;margin-top:3px;color:var(--green)}
+.how a{color:var(--link);font-weight:600}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 30px}
+.stat .lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.stat .fig{font-size:56px;line-height:.94;letter-spacing:-3.1px}
+.stat .figcap{font-size:13.5px;color:var(--t2);margin-top:8px;padding-bottom:20px;border-bottom:1px solid var(--divider)}
+.srow{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:10px 0;
+  border-bottom:1px solid var(--divider);font-size:13.5px;color:var(--t2)}
+.srow:last-child{border-bottom:none;padding-bottom:0}
+.srow b{font-weight:700;color:var(--text)}
+
+/* collections */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:inline-flex;align-items:center;gap:9px;min-height:var(--tap);padding:0 19px;
+  background:var(--surface);border:1px solid var(--border);border-radius:100px;
+  font-size:14px;font-weight:600;transition:border-color .15s,transform .15s,box-shadow .15s}
+.chip:hover{border-color:var(--text);transform:translateY(-2px);box-shadow:0 3px 10px rgba(15,15,15,.06)}
+.chip em{font-style:normal;font-size:12px;font-weight:700;color:var(--t3)}
+
+/* chains */
+.chains{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.chainrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;
+  background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:15px 17px;
+  transition:border-color .15s,transform .15s}
+.chainrow:hover{border-color:#D8D8D8;transform:translateY(-2px)}
+.chainrow .nm{font-size:14.5px;font-weight:700;letter-spacing:-.3px}
+.tag{font-size:9.5px;font-weight:800;padding:4px 9px;border-radius:100px;
+  text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.t-g{background:var(--green-bg);color:var(--green)}
+.t-a{background:var(--amber-bg);color:var(--amber)}
+.t-r{background:var(--red-bg);color:var(--red)}
+
+/* footer */
+footer{background:var(--band);border-top:1px solid var(--hair);padding:52px 28px 26px}
+.finner{max-width:1180px;margin:0 auto}
+.signup{display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;
+  padding-bottom:40px;margin-bottom:40px;border-bottom:1px solid var(--divider)}
+.signup h3{font-size:18px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
+.signup p{font-size:13.5px;color:var(--t2);max-width:420px}
+.signupform{display:flex;gap:9px}
+.signupform input{min-height:var(--tap);width:250px;padding:0 16px;font:400 14px 'Instrument Sans',sans-serif;
+  border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)}
+.signupform input::placeholder{color:var(--t3)}
+.signupform button{min-height:var(--tap);padding:0 20px;background:var(--text);color:#fff;
+  border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.fg{display:grid;grid-template-columns:minmax(220px,1.6fr) repeat(4,1fr);gap:36px}
+/* footer brand block — identical lockup to the header, with proper
+   breathing room beneath so it reads as a sign-off, not a cramped repeat */
+.fg .about .logo{margin-bottom:18px}
+.fg .about p{font-size:13px;color:var(--t2);line-height:1.7;max-width:250px;margin:0}
+.fg h4{font-size:13.5px;font-weight:700;margin-bottom:14px;letter-spacing:-.2px}
+.fg a{display:block;font-size:13px;color:var(--t2);padding:6px 0}
+.fg a:hover{color:var(--text)}
+/* the column-link rule above is more specific than .logo, so it was
+   overriding display:flex and dropping the wordmark onto its own line.
+   Restore the lockup explicitly. */
+.fg a.logo{display:inline-flex;padding:0;font-size:inherit;color:inherit}
+.fg a.logo:hover{color:inherit}
+.fbot{margin-top:30px;padding-top:20px;border-top:1px solid var(--divider);
+  display:flex;justify-content:space-between;gap:18px;font-size:12.5px;color:var(--t3);flex-wrap:wrap}
+.fbot nav{display:flex;gap:20px}
+
+/* search palette */
+.scrim{position:fixed;inset:0;background:rgba(15,15,15,.26);backdrop-filter:blur(3px);
+  z-index:200;display:none;align-items:flex-start;justify-content:center;padding:112px 20px 20px}
+.scrim.on{display:flex}
+.pal{width:100%;max-width:600px;background:#fff;border-radius:15px;
+  box-shadow:0 24px 70px rgba(15,15,15,.19);overflow:hidden;
+  display:flex;flex-direction:column;max-height:min(544px,calc(100vh - 152px));
+  animation:morph .24s cubic-bezier(.22,.78,.24,1) both}
+@keyframes morph{
+  from{max-width:428px;border-radius:60px;opacity:0;transform:translateY(-6px)}
+  to{max-width:600px;border-radius:15px;opacity:1;transform:none}
+}
+.pal-in{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--divider)}
+.pal-in>svg{flex-shrink:0;color:var(--t3);width:18px;height:18px}
+.pal-in input{flex:1;min-width:0;border:none;outline:none;background:transparent;
+  font:400 16px/1.4 'Instrument Sans',sans-serif;color:var(--text)}
+.pal-in input::placeholder{color:var(--t3)}
+.pal-esc{flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--t3);
+  border:1px solid var(--border);padding:6px 9px;border-radius:6px;cursor:pointer}
+.grab{display:none}
+.pal-body{overflow-y:auto;padding:4px 0 8px;flex:1;-webkit-overflow-scrolling:touch}
+.pal-body::-webkit-scrollbar{width:9px}
+.pal-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px;border:2px solid #fff}
+.grp{font-size:11.5px;font-weight:600;color:var(--t3);padding:14px 20px 6px}
+.row{display:flex;align-items:center;gap:13px;margin:0 8px;padding:9px 12px;min-height:var(--tap);
+  border-radius:10px;cursor:pointer;transition:background .1s}
+.row[aria-selected="true"]{background:#F4F4F4}
+.dot{width:36px;height:36px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.dot svg{width:16px;height:16px}
+.dot.art svg{width:100%;height:100%}
+.rtxt{min-width:0;flex:1}
+.r1{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.r1 b{font-weight:800}
+.r2{font-size:12.5px;color:var(--t3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtail{flex-shrink:0;display:flex;align-items:center;gap:8px}
+.nores{padding:36px 20px;text-align:center;color:var(--t3);font-size:13px}
+.nores b{display:block;color:var(--t2);font-weight:600;font-size:14px;margin-bottom:4px}
+.pal-foot{border-top:1px solid var(--divider);padding:11px 20px;display:flex;align-items:center;gap:16px;
+  font-size:11px;color:var(--t3)}
+.pal-foot span{display:flex;align-items:center;gap:5px}
+kbd{font:600 10.5px/1 'Instrument Sans',sans-serif;border:1px solid var(--border);background:var(--bg);
+  padding:4px 6px;border-radius:5px;color:var(--t3)}
+
+/* glass menu */
+.menu{position:fixed;inset:0;z-index:210;display:none}
+.menu.on{display:block}
+.menu-scrim{position:absolute;inset:0;background:rgba(15,15,15,.16);animation:fade .22s ease-out both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:min(84%,360px);
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+  border-left:1px solid rgba(255,255,255,.6);box-shadow:-8px 0 34px rgba(15,15,15,.14);
+  padding:14px 22px calc(24px + env(safe-area-inset-bottom,0px));overflow-y:auto;
+  animation:slidein .3s cubic-bezier(.22,.8,.24,1) both}
+@keyframes slidein{from{transform:translateX(100%)}to{transform:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .drawer{background:var(--surface);border-left:1px solid var(--hair)}
+  .menu-scrim{background:rgba(15,15,15,.34)}
+}
+@media (prefers-contrast:more){
+  .drawer{background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none;border-left:1px solid var(--hair)}
+  .menu-scrim{background:rgba(15,15,15,.4)}
+}
+.mhead{display:flex;align-items:center;gap:10px;min-height:52px;margin-bottom:4px}
+.mclose{width:var(--tap);height:var(--tap);border-radius:10px;border:1px solid var(--border);
+  background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--t2);margin-left:auto;cursor:pointer}
+.mclose svg{width:16px;height:16px}
+.mgrp{font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--t3);padding:20px 0 6px}
+.mlink{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 2px;
+  font-size:17px;font-weight:600;letter-spacing:-.3px;border-bottom:1px solid var(--divider)}
+.mlink:last-child{border-bottom:none}
+.mlink .cd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mlink .ct{margin-left:auto;font-size:12px;font-weight:600;color:var(--t3)}
+.mlink svg{width:16px;height:16px;color:var(--t3);margin-left:auto;flex-shrink:0}
+.mfoot{border-top:1px solid var(--divider);padding-top:14px;margin-top:18px;font-size:12px;color:var(--t3);line-height:1.6}
+
+/* sticky mobile search */
+.botbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;
+  padding:10px 14px calc(16px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to top,var(--bg) 64%,rgba(252,252,252,0));
+  transform:translateY(120%);transition:transform .26s cubic-bezier(.22,.8,.24,1)}
+.botbar.show{transform:none}
+.botsearch{width:100%;display:flex;align-items:center;gap:10px;min-height:52px;
+  background:var(--surface);border:1px solid #DDD;border-radius:100px;padding:0 20px;
+  font-size:15px;color:var(--t3);box-shadow:0 4px 20px rgba(15,15,15,.11);text-align:left;cursor:pointer}
+.botsearch svg{width:18px;height:18px;flex-shrink:0}
+
+/* cookie banner — above the search bar, which waits for an answer */
+.cookie{position:fixed;left:0;right:0;bottom:0;z-index:120;
+  padding:16px 20px calc(18px + env(safe-area-inset-bottom,0px));
+  background:var(--surface);border-top:1px solid var(--hair);box-shadow:0 -6px 26px rgba(15,15,15,.09);
+  display:none;animation:cookieup .28s cubic-bezier(.22,.8,.24,1) both}
+.cookie.on{display:block}
+@keyframes cookieup{from{transform:translateY(100%)}to{transform:none}}
+.cookie-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.cookie p{font-size:13px;color:var(--t2);line-height:1.6;flex:1;min-width:240px}
+.cookie p a{color:var(--link);font-weight:600}
+.cookie .acts{display:flex;gap:9px;flex-shrink:0}
+.cookie button{min-height:var(--tap);padding:0 18px;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer}
+.cookie .rej{border:1px solid var(--border);color:var(--text);background:var(--surface)}
+.cookie .acc{background:var(--text);color:#fff}
+
+@media(max-width:1040px){
+  .tiles{grid-template-columns:repeat(4,1fr)}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .chains{grid-template-columns:repeat(2,1fr)}
+  .trust{grid-template-columns:1fr;gap:28px}
+  .fg{grid-template-columns:1fr 1fr;gap:32px}
+  .fg .about{grid-column:1 / -1}
+  .signup{grid-template-columns:1fr;gap:16px}
+  .top-nav{display:none}
+  .burger{display:flex}
+}
+@media(max-width:640px){
+  section{padding:40px 20px}
+  .hero{padding:44px 20px 36px}
+  .display-md{font-size:24px;letter-spacing:-.9px;font-variation-settings:'opsz' 28}
+  .orn{width:156px;height:19px;margin-bottom:15px}
+  .sec-h{flex-direction:column;align-items:flex-start;gap:4px}
+  .sec-s{margin-bottom:20px}
+  .tiles{grid-template-columns:1fr 1fr;gap:11px}
+  .cards{grid-template-columns:1fr}
+  .chains{grid-template-columns:1fr}
+  .fg{grid-template-columns:1fr;gap:26px}
+  .fg .about .logo{margin-bottom:14px}
+  .signupform{width:100%}
+  .signupform input{width:100%}
+  .stat{padding:22px 22px}
+  .stat .fig{font-size:46px;letter-spacing:-2.4px}
+  .botbar{display:block}
+  footer{padding-bottom:96px}
+  .scrim{padding:0;align-items:flex-end;backdrop-filter:blur(2px)}
+  .pal{max-width:none;border-radius:20px 20px 0 0;max-height:86vh;
+    animation:sheetup .3s cubic-bezier(.22,.8,.24,1) both}
+  @keyframes sheetup{from{transform:translateY(100%)}to{transform:none}}
+  .grab{display:block;width:38px;height:4px;border-radius:3px;background:#DDD;margin:9px auto 2px}
+  .pal-esc,.pal-foot{display:none}
+  .row{min-height:54px}
+  .r1{font-size:15.5px}
+  .cookie .acts{width:100%}
+  .cookie .acts button{flex:1}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .pal,.drawer,.cookie,.menu-scrim{animation:none}
+  .roll span{transition:none}
+  .botbar{transition:none}
+  .tile:hover,.card:hover,.chip:hover,.chainrow:hover{transform:none}
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top" id="top">
+  <div class="top-in">
+    <a class="logo" href="/" aria-label="The Halal Food Index — home">
+      <span id="sealHeader"></span>
+      <span class="wm"><span class="k">The</span><span class="m">Halal Food Index</span></span>
+    </a>
+    <nav class="top-nav" aria-label="Primary">
+      <a href="#">Cuisines</a><a href="#">Areas</a><a href="#">Chains</a><a href="#">Collections</a>
+    </nav>
+    <div class="top-r">
+      <button class="iconbtn" data-search aria-label="Search the index">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <button class="iconbtn burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero">
+  <div class="inner">
+    <h1 class="display-xl">Discover the Best<br>Halal Food in Manchester</h1>
+    <p class="lede">Your trusted guide to halal restaurants, takeaways and cafés across every borough.</p>
+    <button class="trigger" id="heroTrigger" data-search aria-label="Search the index">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span class="roll" id="roll" aria-hidden="true"></span>
+    </button>
+  </div>
+</section>
+
+<section aria-label="Browse by cuisine">
+  <div class="inner"><div class="tiles" id="tiles"></div></div>
+</section>
+
+<section>
+  <div class="inner">
+    <div class="sec-h"><h2 class="display-md">Highest rated right now</h2><a href="#">All venues →</a></div>
+    <p class="sec-s">The best-scoring verified venues across Greater Manchester.</p>
+    <div class="frow" role="group" aria-label="Filters">
+      <button class="fchip live" aria-pressed="true"><span class="d" aria-hidden="true"></span>Open now</button>
+      <button class="fchip" aria-pressed="false">All cuisines</button>
+      <button class="fchip" aria-pressed="false">Alcohol-free</button>
+      <button class="fchip" aria-pressed="false">Delivery</button>
+      <button class="fchip" aria-pressed="false">City Centre</button>
+    </div>
+    <div class="cards" id="cards"></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="inner">
+    <div class="trust">
+      <div>
+        <h2 class="display-md">We check. We write down the date.</h2>
+        <p>No other halal guide will tell you when it last looked. Every listing here says how we know and when we asked — and goes back in the queue when that date gets old.</p>
+        <div class="how">
+          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Confirmed with the venue, a certificate seen, or a certifier's register checked</span></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Every listing states which of those it was, and the date</span></div>
+          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Re-checked at six months whether anything has changed or not — <a href="#">how we verify</a></span></div>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="lbl">The index</div>
+        <div class="fig display-fig" id="figure" data-to="487">487</div>
+        <div class="figcap">verified venues across Greater Manchester</div>
+        <div class="srow"><span>Checked in the last 6 months</span><b>412</b></div>
+        <div class="srow"><span>Awaiting re-check</span><b>63</b></div>
+        <div class="srow"><span>Corrections resolved this month</span><b>11</b></div>
+        <div class="srow"><span>Average age of a check</span><b>94 days</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band last">
+  <div class="inner">
+    <div class="sec-h"><h2 class="display-md">Collections</h2><a href="#">All collections →</a></div>
+    <p class="sec-s">Built around how people actually decide — the occasion, not the cuisine.</p>
+    <div class="chips" id="chips"></div>
+  </div>
+</section>
+
+<section>
+  <div class="inner">
+    <div class="sec-h"><h2 class="display-md">Is it halal?</h2><a href="#">All chains →</a></div>
+    <p class="sec-s">Chain by chain, branch by branch, with the date we last checked.</p>
+    <div class="chains" id="chains"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="finner">
+    <div class="signup">
+      <div>
+        <h3>New places, checked and dated</h3>
+        <p>A short email when we add venues, update a chain's status, or find something worth knowing about. No more than once a month.</p>
+      </div>
+      <div class="signupform">
+        <label class="sr" for="email">Email address</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
+        <button type="button">Subscribe</button>
+      </div>
+    </div>
+
+    <div class="fg">
+      <div class="about">
+        <a class="logo" href="/">
+          <span id="sealFooter"></span>
+          <span class="wm"><span class="k">The</span><span class="m">Halal Food Index</span></span>
+        </a>
+        <p>Greater Manchester's halal food guide. Every listing says how we know, and when we asked.</p>
+      </div>
+      <div><h4>Cuisines</h4><a href="#">Indian</a><a href="#">Pakistani</a><a href="#">Turkish</a><a href="#">Chinese</a><a href="#">Burgers</a><a href="#">All cuisines</a></div>
+      <div><h4>Areas</h4><a href="#">City Centre</a><a href="#">Rusholme</a><a href="#">Northern Quarter</a><a href="#">Cheetham Hill</a><a href="#">Didsbury</a><a href="#">All areas</a></div>
+      <div><h4>Chains</h4><a href="#">Is Nando's halal?</a><a href="#">Is KFC halal?</a><a href="#">Is Subway halal?</a><a href="#">Is McDonald's halal?</a><a href="#">All chains</a></div>
+      <div><h4>The Index</h4><a href="#">How we verify</a><a href="#">Certification explained</a><a href="#">Add a restaurant</a><a href="#">Report a problem</a><a href="#">Contact</a></div>
+    </div>
+
+    <div class="fbot">
+      <span>&copy; 2026 The Halal Food Index</span>
+      <nav aria-label="Legal"><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Cookies</a></nav>
+    </div>
+  </div>
+</footer>
+
+<div class="botbar" id="botbar">
+  <button class="botsearch" data-search aria-label="Search the index">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    Search halal food…
+  </button>
+</div>
+
+<div class="cookie" id="cookie" role="region" aria-label="Cookie choices">
+  <div class="cookie-in">
+    <p>We use cookies to understand how people use the site. Analytics stay switched off until you accept. <a href="#">More about cookies</a>.</p>
+    <div class="acts">
+      <button class="rej" id="ckRej">Reject</button>
+      <button class="acc" id="ckAcc">Accept</button>
+    </div>
+  </div>
+</div>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="menu-scrim" data-menuclose></div>
+  <nav class="drawer" id="drawer" aria-label="Site menu">
+    <div class="mhead">
+      <span class="logo"><span id="sealMenu"></span>
+        <span class="wm"><span class="k">The</span><span class="m">Halal Food Index</span></span></span>
+      <button class="mclose" id="mclose" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="mgrp">Browse</div>
+    <div id="menuBrowse"></div>
+    <div class="mgrp">Popular cuisines</div>
+    <div id="menuCuisines"></div>
+    <div class="mgrp">The index</div>
+    <div>
+      <a class="mlink" href="#">How we verify</a>
+      <a class="mlink" href="#">Add a restaurant</a>
+      <a class="mlink" href="#">Report a problem</a>
+    </div>
+    <p class="mfoot">487 verified venues<br>Last updated 30 July 2026</p>
+  </nav>
+</div>
+
+<div class="scrim" id="scrim" role="dialog" aria-modal="true" aria-label="Search the index">
+  <div class="pal">
+    <div class="grab" aria-hidden="true"></div>
+    <div class="pal-in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label class="sr" for="q">Search restaurants, cuisines, areas and chains</label>
+      <input id="q" placeholder="Search restaurants, cuisines, areas" autocomplete="off" spellcheck="false"
+             role="combobox" aria-expanded="true" aria-controls="results">
+      <button class="pal-esc" id="escBtn">ESC</button>
+    </div>
+    <div class="pal-body" id="results" role="listbox" aria-label="Results"></div>
+    <div class="pal-foot">
+      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span>
+      <span><kbd>&crarr;</kbd> open</span>
+      <span style="margin-left:auto">487 verified venues</span>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+
+/* ==========================================================
+   BRAND TOKENS
+   Three tiers. Semantic green carries meaning; ornamental
+   green and brass carry care and never carry information.
+   ========================================================== */
+var GREEN  = '#0B8F5A';   /* status: open now, halal, verified */
+var ORN    = '#0B6B45';   /* ornament: seal body, border       */
+var BRASS  = '#B8924E';   /* ornament only, never information  */
+
+/* ---------- geometry helpers ---------- */
+function starPts(cx,cy,R,r,points,rot){
+  var out=[], step=Math.PI/points, off=(rot||0)*Math.PI/180;
+  for(var i=0;i<points*2;i++){
+    var rad=(i%2===0)?R:r, a=i*step-Math.PI/2+off;
+    out.push((cx+rad*Math.cos(a)).toFixed(2)+' '+(cy+rad*Math.sin(a)).toFixed(2));
+  }
+  return out.join('L');
+}
+function polyPts(cx,cy,r,sides,rot){
+  var out=[], off=(rot||0)*Math.PI/180;
+  for(var i=0;i<sides;i++){
+    var a=i*2*Math.PI/sides-Math.PI/2+off;
+    out.push((cx+r*Math.cos(a)).toFixed(2)+' '+(cy+r*Math.sin(a)).toFixed(2));
+  }
+  return out.join('L');
+}
+function radials(cx,cy,r1,r2,n,col,w,op){
+  var out=[];
+  for(var i=0;i<n;i++){
+    var a=i*2*Math.PI/n-Math.PI/2;
+    out.push('<path d="M'+(cx+r1*Math.cos(a)).toFixed(2)+' '+(cy+r1*Math.sin(a)).toFixed(2)
+      +'L'+(cx+r2*Math.cos(a)).toFixed(2)+' '+(cy+r2*Math.sin(a)).toFixed(2)
+      +'" stroke="'+col+'" stroke-width="'+w+'"'+(op!==undefined?' opacity="'+op+'"':'')+'/>');
+  }
+  return out.join('');
+}
+
+/* ==========================================================
+   THE SEAL
+   Layered concentric rings, flat colour. Two levels of
+   detail — full above 24px, reduced below, where the fine
+   radials would turn to mush.
+   ========================================================== */
+function seal(size){
+  var reduced = size < 24;
+  var tint = '#6FC79E', core = '#084F33';
+  var s = '<circle cx="24" cy="24" r="23.2" fill="'+BRASS+'"/>'
+        + '<circle cx="24" cy="24" r="20.2" fill="'+ORN+'"/>';
+  if(!reduced){
+    s += radials(24,24,8.8,19.4,16,tint,2.3)
+       + '<circle cx="24" cy="24" r="19.4" fill="none" stroke="'+tint+'" stroke-width="1.3" opacity=".6"/>'
+       + '<circle cx="24" cy="24" r="8.8" fill="'+core+'"/>'
+       + '<circle cx="24" cy="24" r="8.8" fill="none" stroke="'+tint+'" stroke-width="1.6" opacity=".8"/>'
+       + '<path d="M'+starPts(24,24,6.6,2.9,8,22.5)+'Z" fill="'+BRASS+'"/>';
+  } else {
+    s += '<circle cx="24" cy="24" r="10.4" fill="'+core+'"/>'
+       + '<path d="M'+starPts(24,24,8.6,3.8,8,22.5)+'Z" fill="'+BRASS+'"/>';
+  }
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 48 48" aria-hidden="true">'+s+'</svg>';
+}
+document.getElementById('sealHeader').innerHTML = seal(32);
+document.getElementById('sealFooter').innerHTML = seal(32);
+document.getElementById('sealMenu').innerHTML   = seal(30);
+
+/* ==========================================================
+   ORNAMENTAL BORDER — short brass band above headings
+   Interlocking circles, from the Andalusian border reference.
+   ========================================================== */
+function ornBand(col, h, span){
+  var u = h, n = Math.ceil(span/u)+1, g = [];
+  for(var x=0;x<n;x++){
+    g.push('<g transform="translate('+(x*u)+',0)">'
+      +'<g stroke="'+col+'" fill="none" stroke-width="'+(u*0.05)+'" opacity=".75">'
+      +'<circle cx="0" cy="0" r="'+(u/2)+'"/><circle cx="'+u+'" cy="0" r="'+(u/2)+'"/>'
+      +'<circle cx="0" cy="'+u+'" r="'+(u/2)+'"/><circle cx="'+u+'" cy="'+u+'" r="'+(u/2)+'"/>'
+      +'<circle cx="'+(u/2)+'" cy="'+(u/2)+'" r="'+(u/2)+'"/></g>'
+      +'<path d="M'+(u/2)+' '+(u*0.14)+'L'+(u*0.86)+' '+(u/2)+'L'+(u/2)+' '+(u*0.86)+'L'+(u*0.14)+' '+(u/2)+'Z" '
+      +'fill="none" stroke="'+col+'" stroke-width="'+(u*0.045)+'" opacity=".62"/>'
+      +'<rect x="'+(u*0.43)+'" y="'+(u*0.43)+'" width="'+(u*0.14)+'" height="'+(u*0.14)+'" fill="'+col+'" opacity=".85"/>'
+      +'</g>');
+  }
+  return '<svg viewBox="0 0 '+span+' '+u+'" preserveAspectRatio="xMidYMid slice">'
+    +'<path d="M0 '+(u*0.05)+'H'+span+'" stroke="'+col+'" stroke-width="'+(u*0.05)+'" opacity=".65"/>'
+    +'<path d="M0 '+(u*0.95)+'H'+span+'" stroke="'+col+'" stroke-width="'+(u*0.05)+'" opacity=".65"/>'
+    +g.join('')+'</svg>';
+}
+/* ornBand is kept for the chain pages, the verification page and email
+   headers, where a rule above a heading does real work. Nothing on the
+   homepage calls it — if a [data-orn] element ever appears, it fills itself. */
+var ornSvg = ornBand(BRASS, 22, 200);
+Array.prototype.forEach.call(document.querySelectorAll('[data-orn]'), function(el){
+  el.innerHTML = ornSvg;
+});
+
+/* ==========================================================
+   CUISINE PANELS — zellij constructions
+   Four patterns from the Andalusian references, tonal rather
+   than bold. Unit size varies so the row has rhythm.
+   ========================================================== */
+var CUISINES = [
+  {n:'Indian',    c:'#5237B8', k:'circles', u:56, ct:84},
+  {n:'Pakistani', c:'#7B2FA0', k:'stars',   u:60, ct:61},
+  {n:'Turkish',   c:'#B23C10', k:'strap',   u:64, ct:47},
+  {n:'Burgers',   c:'#B0630A', k:'rosette', u:72, ct:28},
+  {n:'Brunch',    c:'#2158B4', k:'circles', u:52, ct:22},
+  {n:'Chinese',   c:'#B32424', k:'stars',   u:66, ct:31},
+  {n:'Lebanese',  c:'#0B7A4A', k:'strap',   u:58, ct:16},
+  {n:'Pizza',     c:'#95430A', k:'rosette', u:64, ct:19},
+  {n:'Japanese',  c:'#0C6B85', k:'circles', u:60, ct:9},
+  {n:'Korean',    c:'#1D4694', k:'stars',   u:54, ct:7},
+  {n:'Desserts',  c:'#B02463', k:'strap',   u:62, ct:24}
+];
+var CU = {};
+CUISINES.forEach(function(c){ CU[c.n] = c; });
+
+var CONSTRUCT = {
+  /* interlocking circles + diamond lattice */
+  circles: function(col, u){
+    var r = u/2;
+    return '<g stroke="'+col+'" fill="none" stroke-width="'+(u*0.055)+'" opacity=".5">'
+      +'<circle cx="0" cy="0" r="'+r+'"/><circle cx="'+u+'" cy="0" r="'+r+'"/>'
+      +'<circle cx="0" cy="'+u+'" r="'+r+'"/><circle cx="'+u+'" cy="'+u+'" r="'+r+'"/>'
+      +'<circle cx="'+(u/2)+'" cy="'+(u/2)+'" r="'+r+'"/></g>'
+      +'<path d="M'+(u/2)+' '+(u*0.16)+'L'+(u*0.84)+' '+(u/2)+'L'+(u/2)+' '+(u*0.84)+'L'+(u*0.16)+' '+(u/2)+'Z" '
+      +'fill="none" stroke="'+col+'" stroke-width="'+(u*0.05)+'" opacity=".42"/>'
+      +'<rect x="'+(u*0.42)+'" y="'+(u*0.42)+'" width="'+(u*0.16)+'" height="'+(u*0.16)+'" fill="'+col+'" opacity=".55"/>';
+  },
+  /* eight-point star field */
+  stars: function(col, u){
+    var s = '<path d="M'+starPts(u/2,u/2,u*0.42,u*0.19,8,22.5)+'Z" fill="'+col+'" opacity=".4"/>'
+          + '<path d="M'+starPts(u/2,u/2,u*0.19,u*0.085,8,22.5)+'Z" fill="'+col+'" opacity=".62"/>';
+    [[0,0],[u,0],[0,u],[u,u]].forEach(function(p){
+      s += '<rect x="'+(p[0]-u*0.075)+'" y="'+(p[1]-u*0.075)+'" width="'+(u*0.15)+'" height="'+(u*0.15)
+        +'" fill="'+col+'" opacity=".5" transform="rotate(45 '+p[0]+' '+p[1]+')"/>';
+    });
+    return s;
+  },
+  /* interlacing strapwork */
+  strap: function(col, u){
+    return '<path d="M'+polyPts(u/2,u/2,u*0.44,8,22.5)+'Z" fill="none" stroke="'+col+'" '
+      +'stroke-width="'+(u*0.075)+'" opacity=".42" stroke-linejoin="round"/>'
+      +'<path d="M'+polyPts(u/2,u/2,u*0.44,8,0)+'Z" fill="none" stroke="'+col+'" '
+      +'stroke-width="'+(u*0.075)+'" opacity=".42" stroke-linejoin="round"/>'
+      +'<path d="M'+polyPts(u/2,u/2,u*0.15,8,22.5)+'Z" fill="'+col+'" opacity=".6"/>'
+      +'<g stroke="'+col+'" stroke-width="'+(u*0.06)+'" opacity=".34" stroke-linecap="round">'
+      +'<path d="M0 0L'+(u*0.2)+' '+(u*0.2)+'"/><path d="M'+u+' 0L'+(u*0.8)+' '+(u*0.2)+'"/>'
+      +'<path d="M0 '+u+'L'+(u*0.2)+' '+(u*0.8)+'"/><path d="M'+u+' '+u+'L'+(u*0.8)+' '+(u*0.8)+'"/></g>';
+  },
+  /* radiating rosette */
+  rosette: function(col, u){
+    var s = radials(u/2, u/2, u*0.17, u*0.42, 16, col, u*0.05, .38);
+    s += '<circle cx="'+(u/2)+'" cy="'+(u/2)+'" r="'+(u*0.17)+'" fill="none" stroke="'+col+'" '
+       + 'stroke-width="'+(u*0.055)+'" opacity=".5"/>'
+       + '<path d="M'+starPts(u/2,u/2,u*0.115,u*0.05,8,22.5)+'Z" fill="'+col+'" opacity=".62"/>';
+    [[0,0],[u,0],[0,u],[u,u]].forEach(function(p){
+      s += '<path d="M'+starPts(p[0],p[1],u*0.13,u*0.058,8,22.5)+'Z" fill="'+col+'" opacity=".45"/>';
+    });
+    return s;
+  }
+};
+
+function art(name){
+  var cu = CU[name]; if(!cu) return '';
+  var u = cu.u, span = 240, n = Math.ceil(span/u)+2, g = [];
+  for(var y=-1;y<n;y++) for(var x=-1;x<n;x++)
+    g.push('<g transform="translate('+(x*u)+','+(y*u)+')">'+CONSTRUCT[cu.k](cu.c, u)+'</g>');
+  return '<svg viewBox="0 0 '+span+' '+(span*0.8)+'" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+    +'<rect width="'+span+'" height="'+span+'" fill="'+cu.c+'" opacity=".075"/>'+g.join('')+'</svg>';
+}
+
+var TILE_SET = ['Indian','Pakistani','Turkish','Burgers','Brunch','Chinese'];
+document.getElementById('tiles').innerHTML = TILE_SET.map(function(n){
+  var cu = CU[n];
+  return '<a class="tile" href="#" style="background:'+cu.c+'12" aria-label="'+n+' — '+cu.ct+' venues">'
+    + '<span class="art">'+art(n)+'</span>'
+    + '<span class="cap"><b class="display-sm" style="color:'+cu.c+'">'+n+'</b>'
+    + '<span>'+cu.ct+' venues</span></span></a>';
+}).join('');
+
+/* ==========================================================
+   VENUE CARDS
+   Verification wording states the method plainly.
+   ========================================================== */
+var VENUES = [
+  {n:'MyLahore Manchester',  c:'Pakistani', a:'Rusholme',         s:'9.1', t:'Exceptional', v:'Confirmed with venue · Jul 2026', open:true,  hrs:'closes 11pm'},
+  {n:'Archies Manchester',   c:'Burgers',   a:'City Centre',      s:'9.3', t:'Exceptional', v:'HFA certificate seen · Jul 2026', open:true,  hrs:'closes 1am'},
+  {n:'Ezra & Gil',           c:'Brunch',    a:'Northern Quarter', s:'9.2', t:'Exceptional', v:'Visited in person · Jul 2026',    open:false, hrs:'opens 8am'},
+  {n:'Kabana',               c:'Pakistani', a:'City Centre',      s:'8.9', t:'Excellent',   v:'HMC register checked · Jul 2026', open:true,  hrs:'closes 10pm'},
+  {n:'Impasto Pizza',        c:'Pizza',     a:'Cheetham Hill',    s:'8.9', t:'Excellent',   v:'Confirmed with venue · Jun 2026', open:true,  hrs:'closes 11pm'},
+  {n:'Zouk Tea Bar & Grill', c:'Indian',    a:'City Centre',      s:'8.7', t:'Excellent',   v:'HFA certificate seen · Jun 2026', open:true,  hrs:'closes 11pm'},
+  {n:'Bab Sharqi',           c:'Lebanese',  a:'Northern Quarter', s:'8.5', t:'Very good',   v:'Confirmed with venue · Jun 2026', open:false, hrs:'opens noon'},
+  {n:'Antalya Grill',        c:'Turkish',   a:'Rusholme',         s:'8.3', t:'Very good',   v:'Confirmed with venue · May 2026', open:true,  hrs:'closes 1am'}
+];
+document.getElementById('cards').innerHTML = VENUES.map(function(v){
+  var cu = CU[v.c];
+  var status = v.open
+    ? '<span class="open">Open · '+v.hrs+'</span>'
+    : '<span class="shut">Closed · '+v.hrs+'</span>';
+  return '<a class="card" href="#"><span class="sw">'+art(v.c)+'</span><span class="cb">'
+    + '<span class="kick" style="color:'+cu.c+'">'+v.c+' · '+v.a+'</span>'
+    + '<span class="cname">'+v.n+'</span>'
+    + '<span class="cmeta"><span class="score">'+v.s+'</span>'+v.t+status+'</span>'
+    + '<span class="cver">'+v.v+'</span></span></a>';
+}).join('');
+
+/* ---------- collections ---------- */
+var COLLECTIONS = [
+  ['Brunch',22],['Family friendly',41],['Late night',29],['Alcohol-free',88],
+  ['Date night',17],['Big groups',24],['Breakfast',31],['Buffet',14],
+  ['Fine dining',9],['Private dining',6],['Trafford Centre',12],['Wedding catering',8]
+];
+document.getElementById('chips').innerHTML = COLLECTIONS.map(function(c){
+  return '<a class="chip" href="#">'+c[0]+'<em>'+c[1]+'</em></a>';
+}).join('');
+
+/* ---------- chains ---------- */
+var CHAINS = [
+  ["Nando's",'t-a','Partial'], ['KFC','t-a','Branch only'],
+  ['Subway','t-g','Halal'],    ['Five Guys','t-g','Halal'],
+  ['Pizza Hut','t-a','Branch only'], ["Domino's",'t-a','Branch only'],
+  ["McDonald's",'t-r','Not halal'],  ['Greggs','t-r','Not halal']
+];
+document.getElementById('chains').innerHTML = CHAINS.map(function(c){
+  return '<a class="chainrow" href="#"><span class="nm">'+c[0]+'</span>'
+    + '<span class="tag '+c[1]+'">'+c[2]+'</span></a>';
+}).join('');
+
+/* ---------- menu ---------- */
+var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+document.getElementById('menuBrowse').innerHTML =
+  ['Cuisines','Areas','Chains','Collections'].map(function(n){
+    return '<a class="mlink" href="#">'+n+CHEV+'</a>';
+  }).join('');
+document.getElementById('menuCuisines').innerHTML =
+  ['Indian','Pakistani','Turkish','Burgers','Brunch'].map(function(n){
+    return '<a class="mlink" href="#"><span class="cd" style="background:'+CU[n].c+'"></span>'
+      + n + '<span class="ct">'+CU[n].ct+'</span></a>';
+  }).join('');
+
+/* ==========================================================
+   ODOMETER PLACEHOLDER
+   ========================================================== */
+var PROMPTS = [
+  'Find halal brunch',
+  'Find halal food in Rusholme',
+  "Is Nando's halal?",
+  'Find a halal steakhouse',
+  'Find halal food at the Trafford Centre',
+  'Find alcohol-free dining'
+];
+var rollEl = document.getElementById('roll'), rollIdx = 0, currentLine = null;
+function setRoll(text, animate){
+  var next = document.createElement('span');
+  next.textContent = text;
+  if(!animate){ rollEl.replaceChildren(next); currentLine = next; return; }
+  next.className = 'in';
+  rollEl.appendChild(next);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    next.className = '';
+    if(currentLine){
+      currentLine.className = 'out';
+      var gone = currentLine;
+      setTimeout(function(){ gone.remove(); }, 540);
+    }
+    currentLine = next;
+  });});
+}
+setRoll(PROMPTS[0], false);
+setInterval(function(){
+  rollIdx = (rollIdx + 1) % PROMPTS.length;
+  setRoll(PROMPTS[rollIdx], true);
+}, 3400);
+
+/* ==========================================================
+   SEARCH
+   ========================================================== */
+var AREAS = [['Manchester',487],['City Centre',126],['Rusholme',58],['Northern Quarter',41],
+  ['Cheetham Hill',34],['Didsbury',22],['Chorlton',15],['Trafford Centre',12],['Salford Quays',11]];
+var CHAIN_DATA = [
+  ["Nando's",'partial','Selected branches only'], ['KFC','partial','Branch dependent'],
+  ['Subway','halal','All UK branches'],            ['Five Guys','halal','All UK branches'],
+  ['Pizza Hut','partial','Branch dependent'],      ["Domino's",'partial','Branch dependent'],
+  ["McDonald's",'not','Not halal in the UK'],      ['Greggs','not','Not halal in the UK']
+];
+var COLL_PAGES = [
+  ['Halal brunch in Manchester',22],['Halal breakfast in Manchester',31],
+  ['Halal buffet in Manchester',14],['Halal steakhouse in Manchester',11],
+  ['Halal pizza in Manchester',19],['Halal food at the Trafford Centre',12],
+  ['Alcohol-free dining in Manchester',88],['Halal wedding catering',8]
+];
+var STATUS = {halal:['t-g','Halal'], partial:['t-a','Partial'], not:['t-r','Not halal']};
+var ICONS = {
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="2.8"/></svg>',
+  chain:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9.5 14.5 14.5 9.5"/><path d="M11.5 6.8 13 5.3a4.2 4.2 0 0 1 6 6l-1.5 1.5"/><path d="M12.5 17.2 11 18.7a4.2 4.2 0 0 1-6-6l1.5-1.5"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8.5 6h11M8.5 12h11M8.5 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  find:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
+};
+
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+function score(hay, q){
+  var h = hay.toLowerCase(), n = q.toLowerCase();
+  if(h === n) return 100;
+  if(h.indexOf(n) === 0) return 80;
+  var words = h.split(/[\s&'\u2019-]+/);
+  for(var i=0;i<words.length;i++) if(words[i].indexOf(n) === 0) return 60;
+  if(h.indexOf(n) > -1) return 30;
+  return 0;
+}
+function mark(text, q){
+  var i = text.toLowerCase().indexOf(q.toLowerCase());
+  if(i < 0 || !q) return esc(text);
+  return esc(text.slice(0,i)) + '<b>' + esc(text.slice(i,i+q.length)) + '</b>' + esc(text.slice(i+q.length));
+}
+/* under 40px the panel geometry is noise, so cuisines use solid colour */
+function cuDot(name){ return '<span class="dot" style="background:'+CU[name].c+'"></span>'; }
+function icDot(key){ return '<span class="dot" style="background:#EFEFEF;color:#51514E">'+ICONS[key]+'</span>'; }
+function row(dot, r1, r2, tail){
+  return '<div class="row" role="option" aria-selected="false">'+dot
+    + '<span class="rtxt"><span class="r1">'+r1+'</span><span class="r2">'+r2+'</span></span>'
+    + '<span class="rtail">'+(tail||'')+'</span></div>';
+}
+function cuisinesIn(area){
+  if(area === 'Manchester') return ['Indian','Turkish','Brunch','Burgers'];
+  var found = [];
+  VENUES.forEach(function(v){ if(v.a === area && found.indexOf(v.c) < 0) found.push(v.c); });
+  return found.length ? found : ['Indian','Turkish','Brunch'];
+}
+
+function build(q){
+  var groups = [];
+  if(!q.trim()){
+    groups.push({label:'Popular right now', items:[
+      row(cuDot('Brunch'), 'Halal brunch in Manchester', '22 venues'),
+      row(icDot('chain'), "Is Nando's halal?", 'Selected branches only', '<span class="tag t-a">Partial</span>'),
+      row(cuDot('Indian'), 'Indian in Manchester', '84 venues'),
+      row(icDot('pin'), 'Halal food in Rusholme', '58 venues')
+    ]});
+    return groups;
+  }
+  var venues=[], cuisines=[], areas=[], chains=[], colls=[], combos=[], lateral=[];
+
+  VENUES.forEach(function(v){
+    var s = Math.max(score(v.n,q), score(v.c,q)*0.35, score(v.a,q)*0.3);
+    if(s > 0) venues.push({s:s, el: row(cuDot(v.c), mark(v.n,q), v.c+' · '+v.a,
+      '<span class="tag t-g">Halal</span>')});
+  });
+  CUISINES.forEach(function(c){
+    var s = score(c.n,q);
+    if(s > 0) cuisines.push({s:s, el: row(cuDot(c.n), mark(c.n,q)+' in Manchester', c.ct+' venues')});
+  });
+  AREAS.forEach(function(a){
+    var s = score(a[0],q);
+    if(s > 0) areas.push({s:s, name:a[0], el: row(icDot('pin'), 'Halal food in '+mark(a[0],q), a[1]+' venues')});
+  });
+  CHAIN_DATA.forEach(function(c){
+    var s = score(c[0],q);
+    if(s > 0) chains.push({s:s, el: row(icDot('chain'), 'Is '+mark(c[0],q)+' halal?', c[2],
+      '<span class="tag '+STATUS[c[1]][0]+'">'+STATUS[c[1]][1]+'</span>')});
+  });
+  COLL_PAGES.forEach(function(c){
+    var s = score(c[0],q);
+    if(s > 0) colls.push({s:s, el: row(icDot('list'), mark(c[0],q), c[1]+' venues')});
+  });
+  [venues,cuisines,areas,chains,colls].forEach(function(a){ a.sort(function(x,y){ return y.s - x.s; }); });
+
+  /* combination layer — only cuisines that actually have listings there */
+  if(areas.length){
+    var top = areas[0].name;
+    cuisinesIn(top).slice(0,3).forEach(function(c){
+      combos.push(row(cuDot(c), c+' in '+top, 'Filtered · halal verified'));
+    });
+  }
+  /* lateral layer — a named venue usually means deciding, not navigating */
+  if(venues.length && venues[0].s >= 60){
+    var v = null;
+    for(var i=0;i<VENUES.length;i++){ if(score(VENUES[i].n,q) >= 60){ v = VENUES[i]; break; } }
+    if(v){
+      lateral.push(row(cuDot(v.c), 'All '+v.c+' in Manchester', CU[v.c].ct+' venues · same cuisine'));
+      lateral.push(row(icDot('pin'), 'All halal food in '+v.a, 'Same area'));
+    }
+  }
+
+  function pick(a,n){ return a.slice(0,n).map(function(x){ return x.el; }); }
+  if(venues.length)   groups.push({label:'Restaurants',     items:pick(venues,4)});
+  if(chains.length)   groups.push({label:'Chain status',    items:pick(chains,3)});
+  if(areas.length)    groups.push({label:'Areas',           items:pick(areas,2)});
+  if(combos.length)   groups.push({label:'Narrow it down',  items:combos});
+  if(cuisines.length) groups.push({label:'Cuisines',        items:pick(cuisines,3)});
+  if(colls.length)    groups.push({label:'Collections',     items:pick(colls,3)});
+  if(lateral.length)  groups.push({label:'Or browse wider', items:lateral});
+  return groups;
+}
+
+var scrim = document.getElementById('scrim');
+var input = document.getElementById('q');
+var out   = document.getElementById('results');
+var rows = [], cursor = -1, lastFocus = null;
+
+function render(){
+  var q = input.value, groups = build(q), html = '';
+  var empty = true;
+  groups.forEach(function(g){ if(g.items.length) empty = false; });
+  if(q.trim() && (!groups.length || empty)){
+    html = '<div class="nores"><b>Nothing matching \u201C'+esc(q)+'\u201D</b>Try a cuisine, an area, or a chain name.</div>';
+  } else {
+    html = groups.map(function(g){
+      return '<div class="grp">'+g.label+'</div>'+g.items.join('');
+    }).join('');
+  }
+  if(q.trim()){
+    html += row(icDot('find'), 'Search everything for <b>\u201C'+esc(q)+'\u201D</b>',
+      'All venues, chains and collections');
+  }
+  out.innerHTML = html;
+  rows = Array.prototype.slice.call(out.querySelectorAll('.row'));
+  cursor = rows.length ? 0 : -1;
+  paint();
+}
+function paint(){
+  rows.forEach(function(r,i){
+    r.setAttribute('aria-selected', i === cursor ? 'true' : 'false');
+    if(i === cursor) r.scrollIntoView({block:'nearest'});
+  });
+}
+function openPal(){
+  lastFocus = document.activeElement;
+  closeMenu();
+  scrim.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  input.value = '';
+  render();
+  requestAnimationFrame(function(){ input.focus(); });
+}
+function closePal(){
+  scrim.classList.remove('on');
+  document.body.style.overflow = '';
+  if(lastFocus) lastFocus.focus();
+}
+Array.prototype.forEach.call(document.querySelectorAll('[data-search]'), function(el){
+  el.addEventListener('click', openPal);
+});
+document.getElementById('escBtn').addEventListener('click', closePal);
+scrim.addEventListener('click', function(e){ if(e.target === scrim) closePal(); });
+input.addEventListener('input', render);
+out.addEventListener('mousemove', function(e){
+  var r = e.target.closest('.row');
+  if(r){ cursor = rows.indexOf(r); paint(); }
+});
+out.addEventListener('click', function(e){ if(e.target.closest('.row')) closePal(); });
+
+/* ==========================================================
+   GLASS MENU
+   ========================================================== */
+var menu = document.getElementById('menu');
+var drawer = document.getElementById('drawer');
+var burger = document.getElementById('burger');
+var menuFocus = null;
+
+function openMenu(){
+  menuFocus = document.activeElement;
+  menu.classList.add('on');
+  burger.setAttribute('aria-expanded','true');
+  document.body.style.overflow = 'hidden';
+  requestAnimationFrame(function(){ document.getElementById('mclose').focus(); });
+}
+function closeMenu(){
+  if(!menu.classList.contains('on')) return;
+  menu.classList.remove('on');
+  burger.setAttribute('aria-expanded','false');
+  document.body.style.overflow = '';
+  if(menuFocus) menuFocus.focus();
+}
+burger.addEventListener('click', openMenu);
+document.getElementById('mclose').addEventListener('click', closeMenu);
+menu.addEventListener('click', function(e){
+  if(e.target.hasAttribute('data-menuclose')) closeMenu();
+});
+drawer.addEventListener('click', function(e){ if(e.target.closest('a')) closeMenu(); });
+
+document.addEventListener('keydown', function(e){
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault();
+    scrim.classList.contains('on') ? closePal() : openPal();
+    return;
+  }
+  if(e.key === 'Escape'){ closePal(); closeMenu(); return; }
+
+  /* focus stays inside the drawer while it is open */
+  if(e.key === 'Tab' && menu.classList.contains('on')){
+    var f = drawer.querySelectorAll('a[href],button');
+    if(!f.length) return;
+    var first = f[0], last = f[f.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    return;
+  }
+  if(!scrim.classList.contains('on')) return;
+  if(e.key === 'ArrowDown'){ e.preventDefault(); if(rows.length){ cursor = (cursor+1) % rows.length; paint(); } }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); if(rows.length){ cursor = (cursor-1+rows.length) % rows.length; paint(); } }
+  else if(e.key === 'Enter'){ e.preventDefault(); if(cursor >= 0) closePal(); }
+});
+
+/* ==========================================================
+   COOKIE CONSENT
+   The search bar stays hidden until this is answered, so the
+   two never occupy the same corner of the screen.
+   ========================================================== */
+var cookie = document.getElementById('cookie');
+var botbar = document.getElementById('botbar');
+var consentAnswered = false, heroGone = false;
+
+function updateBotbar(){
+  botbar.classList.toggle('show', heroGone && consentAnswered);
+}
+function answerConsent(granted){
+  consentAnswered = true;
+  cookie.classList.remove('on');
+  /* Consent Mode v2 goes here:
+     gtag('consent','update',{ analytics_storage: granted ? 'granted' : 'denied' }); */
+  updateBotbar();
+}
+document.getElementById('ckAcc').addEventListener('click', function(){ answerConsent(true); });
+document.getElementById('ckRej').addEventListener('click', function(){ answerConsent(false); });
+setTimeout(function(){ if(!consentAnswered) cookie.classList.add('on'); }, 700);
+
+/* ==========================================================
+   STICKY MOBILE SEARCH
+   Appears once the hero pill scrolls away, and only after
+   consent has been answered.
+   ========================================================== */
+var heroTrigger = document.getElementById('heroTrigger');
+if('IntersectionObserver' in window){
+  new IntersectionObserver(function(entries){
+    heroGone = !entries[0].isIntersecting;
+    updateBotbar();
+  }, {threshold:0, rootMargin:'-8px 0px 0px 0px'}).observe(heroTrigger);
+}
+
+/* header hairline */
+var topBar = document.getElementById('top');
+function onScroll(){ topBar.classList.toggle('stuck', window.scrollY > 8); }
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+/* ==========================================================
+   THE FIGURE COUNTS UP — the number is the product
+   ========================================================== */
+var fig = document.getElementById('figure');
+var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!reduce && 'IntersectionObserver' in window){
+  var target = parseInt(fig.dataset.to, 10);
+  new IntersectionObserver(function(entries, obs){
+    if(!entries[0].isIntersecting) return;
+    obs.disconnect();
+    var start = performance.now(), dur = 900;
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      fig.textContent = Math.round(target * (1 - Math.pow(1-p, 3)));
+      if(p < 1) requestAnimationFrame(tick); else fig.textContent = target;
+    }
+    fig.textContent = '0';
+    requestAnimationFrame(tick);
+  }, {threshold:0.4}).observe(fig);
+}
+
+render();
+</script>
+</body>
+</html>

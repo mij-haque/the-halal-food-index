@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Social preview cards — The Halal Food Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FCFCFC;--band:#FFFFFF;--surface:#FFFFFF;
+  --hair:#E4E4E4;--border:#E9E9E9;--divider:#F1F1F1;
+  --text:#0F0F0F;--t2:#51514E;--t3:#8C8C89;
+  --green:#0B8F5A;--green-bg:#E4F4EC;
+  --amber:#B06005;--amber-bg:#FBF0E0;
+  --red:#C02929;--red-bg:#FAEAEA;
+  --link:#1F56BA;
+}
+body{font-family:'Instrument Sans',system-ui,sans-serif;background:#E8E8E8;color:var(--text);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.page{max-width:1240px;margin:0 auto;padding:48px 24px 100px}
+h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;letter-spacing:-1.3px;
+  font-variation-settings:'opsz' 96;margin-bottom:9px}
+.lede{font-size:15px;color:var(--t2);line-height:1.65;max-width:660px;margin-bottom:40px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.item{}
+.item .hd{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.item .hd .n{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.item .hd h2{font-size:16px;font-weight:700;letter-spacing:-.4px}
+.item .use{font-size:12.5px;color:var(--t2);margin-bottom:13px}
+.item .use code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:#DDD;
+  padding:1px 5px;border-radius:4px}
+
+/* ============ OG CARD — always 1200x630 ============ */
+.og{width:100%;aspect-ratio:1200/630;border-radius:10px;overflow:hidden;position:relative;
+  box-shadow:0 4px 20px rgba(0,0,0,.13);container-type:inline-size}
+/* everything inside scales with the card so it reads at any preview size */
+.og *{font-family:'Instrument Sans',sans-serif}
+.disp{font-family:'Bricolage Grotesque',sans-serif!important;font-weight:800;font-variation-settings:'opsz' 96}
+
+.og .art{position:absolute;inset:0}
+.og .art svg{width:100%;height:100%;display:block}
+.og .pad{position:absolute;inset:0;padding:7cqw 7.5cqw;display:flex;flex-direction:column}
+.og .brand{display:flex;align-items:center;gap:1.1cqw;font-weight:800;font-size:2.1cqw;letter-spacing:-.04em}
+.og .brand i{width:1.1cqw;height:1.1cqw;border-radius:50%;background:var(--green);display:block}
+.og .spacer{flex:1}
+.og .kicker{font-size:1.6cqw;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin-bottom:1.6cqw}
+.og .big{font-size:6.2cqw;line-height:1.02;letter-spacing:-.045em}
+.og .sub{font-size:2.1cqw;color:var(--t2);margin-top:2cqw;line-height:1.4;max-width:78%}
+.og .foot{display:flex;align-items:center;gap:1.6cqw;margin-top:2.6cqw;font-size:1.7cqw;font-weight:600;color:var(--t3)}
+.og .chip{display:inline-flex;align-items:center;gap:.8cqw;padding:.7cqw 1.6cqw;border-radius:100px;
+  font-size:1.55cqw;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.c-g{background:var(--green-bg);color:var(--green)}
+.c-a{background:var(--amber-bg);color:var(--amber)}
+.c-r{background:var(--red-bg);color:var(--red)}
+.og .verdictbig{font-size:8.6cqw;line-height:.95;letter-spacing:-.05em}
+.og .score{display:inline-flex;align-items:center;justify-content:center;
+  background:var(--text);color:#fff;font-weight:800;font-size:2.4cqw;padding:.7cqw 1.4cqw;border-radius:.8cqw;letter-spacing:-.03em}
+.og .rowline{display:flex;align-items:center;gap:1.4cqw}
+
+/* ============ CHAT CONTEXT ============ */
+.chatsec{margin-top:56px;padding-top:44px;border-top:1px solid #D4D4D4}
+.chats{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:24px}
+@media(max-width:900px){.chats{grid-template-columns:1fr}}
+.wa{background:#E4DDD4;border-radius:16px;padding:20px 16px;min-height:290px;
+  background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:16px 16px}
+.wa .day{text-align:center;font-size:11px;color:#7A736B;font-weight:600;margin-bottom:14px}
+.wa .bub{max-width:82%;background:#fff;border-radius:12px;padding:5px;box-shadow:0 1px 2px rgba(0,0,0,.1);margin-bottom:10px}
+.wa .bub.me{margin-left:auto;background:#D9FDD3}
+.wa .txt{font-size:14px;padding:5px 8px 7px;line-height:1.4}
+.wa .prev{background:rgba(0,0,0,.045);border-radius:9px;overflow:hidden}
+.wa .prev .thumb{aspect-ratio:1200/630;overflow:hidden}
+.wa .prev .thumb>div{width:100%;height:100%}
+.wa .prev .meta{padding:8px 10px 10px}
+.wa .prev .t{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:2px}
+.wa .prev .d{font-size:12px;color:#667781;line-height:1.35}
+.wa .prev .u{font-size:11px;color:#8696A0;margin-top:3px;text-transform:lowercase}
+.wa .time{font-size:10.5px;color:#8696A0;text-align:right;padding:0 8px 4px}
+.badlbl{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:100px;display:inline-block;margin-bottom:10px}
+.bad{background:var(--red-bg);color:var(--red)}
+.good{background:var(--green-bg);color:var(--green)}
+.nopreview{background:rgba(0,0,0,.045);border-radius:9px;padding:12px}
+.nopreview .t{font-size:13px;font-weight:600;color:#667781}
+.nopreview .u{font-size:11px;color:#8696A0;margin-top:2px}
+
+.note{background:var(--surface);border:1px solid #DCDCDC;border-radius:14px;padding:24px 26px;margin-top:44px}
+.note h3{font-size:14.5px;font-weight:700;margin-bottom:11px;letter-spacing:-.3px}
+.note p{font-size:13.5px;color:var(--t2);line-height:1.75;margin-bottom:10px}
+.note p:last-child{margin-bottom:0}
+.note strong{color:var(--text);font-weight:600}
+.note code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#F1F1F1;padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Social preview cards</h1>
+<p class="lede">One template per page type, filled from the database at build time. All six are 1200×630 — the size WhatsApp, iMessage, X, Facebook and LinkedIn all read. Scroll to the bottom to see them in a chat, which is where they'll actually be seen.</p>
+
+<div class="grid" id="cards"></div>
+
+<div class="chatsec">
+  <h1 style="font-size:22px;letter-spacing:-.9px">In the place it matters</h1>
+  <p class="lede" style="margin-bottom:0">Same link, same message. The only difference is whether the tags exist.</p>
+  <div class="chats" id="chats"></div>
+</div>
+
+<div class="note">
+  <h3>How this actually works</h3>
+  <p>These are HTML, not hand-drawn images. Next.js can render them to PNG on demand at <code>/api/og</code> — the URL carries the page's data, so <code>/api/og?type=chain&amp;name=Nando's&amp;status=partial</code> returns that card. <strong>487 venues means 487 unique preview images and no design work per venue.</strong></p>
+  <p>Two tags per page do the job: <code>og:image</code> pointing at that URL, and <code>twitter:card</code> set to <code>summary_large_image</code> so X and iMessage use the wide format rather than a thumbnail.</p>
+  <p>The one rule worth holding: <strong>the verdict or the venue name has to be readable at thumbnail size.</strong> WhatsApp renders these around 250px wide on a phone. Anything under about 4cqw disappears — which is why the chain card puts the answer at 8.6cqw and almost nothing else on it.</p>
+</div>
+
+</div>
+
+<script>
+const CU = {
+  Indian:   {c:'#5237B8', g:'frame', u:46},
+  Pakistani:{c:'#7B2FA0', g:'check', u:58},
+  Turkish:  {c:'#B23C10', g:'grid',  u:38},
+  Burgers:  {c:'#B0630A', g:'diag',  u:52},
+  Brunch:   {c:'#2158B4', g:'check', u:44},
+  Chinese:  {c:'#B32424', g:'frame', u:64}
+};
+function unit(kind,col,u){
+  const S=(a,w)=>`fill="none" stroke="${col}" stroke-width="${w}" opacity="${a}"`;
+  const F=a=>`fill="${col}" opacity="${a}"`; const m=u/28;
+  if(kind==='frame') return `<rect x="${u*.14}" y="${u*.14}" width="${u*.72}" height="${u*.72}" ${S(.6,3.1*m)}/><rect x="${u*.38}" y="${u*.38}" width="${u*.24}" height="${u*.24}" ${F(.68)}/>`;
+  if(kind==='check') return `<rect width="${u/2}" height="${u/2}" ${F(.42)}/><rect x="${u/2}" y="${u/2}" width="${u/2}" height="${u/2}" ${F(.42)}/>`;
+  if(kind==='grid')  return `<path d="M0 0h${u}M0 ${u/2}h${u}M0 ${u}h${u}M0 0v${u}M${u/2} 0v${u}M${u} 0v${u}" ${S(.5,3.2*m)}/>`;
+  return `<path d="M${-u*.3} ${u*.7}L${u*.7} ${-u*.3}M0 ${u}L${u} 0M${u*.3} ${u*1.3}L${u*1.3} ${u*.3}" ${S(.5,4.2*m)}/><rect x="${u*.4}" y="${u*.4}" width="${u*.2}" height="${u*.2}" ${F(.6)}/>`;
+}
+function art(name, w, h){
+  const cu = CU[name]; const u = cu.u;
+  const cols = Math.ceil(w/u)+1, rows = Math.ceil(h/u)+1, g=[];
+  for(let y=0;y<rows;y++) for(let x=0;x<cols;x++) g.push(`<g transform="translate(${x*u},${y*u})">${unit(cu.g,cu.c,u)}</g>`);
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice">${g.join('')}</svg>`;
+}
+const brand = `<span class="brand"><i></i>The Halal Food Index</span>`;
+const FADE = '-webkit-mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.55) 46%,rgba(0,0,0,0) 88%);mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.55) 46%,rgba(0,0,0,0) 88%)';
+
+/* ---------------- six templates ---------------- */
+const CARDS = [
+  {
+    n:'Template 1', h:'Homepage',
+    use:'The root URL — <code>/</code>. The one shared most often, so it carries the brand rather than a page.',
+    html:`<div class="og" style="background:var(--band)">
+      <span class="art" style="${FADE};opacity:.55">${art('Brunch',1200,630)}</span>
+      <span class="pad">
+        ${brand}<span class="spacer"></span>
+        <span class="big disp">Discover the Best<br>Halal Food in Manchester</span>
+        <span class="sub">Your trusted guide to halal restaurants, takeaways and cafés across every borough.</span>
+      </span></div>`
+  },
+  {
+    n:'Template 2', h:'Chain verdict',
+    use:'<code>/is-nandos-halal</code> — the highest-volume page type and the one most likely to be pasted into a group chat mid-argument.',
+    html:`<div class="og" style="background:var(--band)">
+      <span class="pad">
+        ${brand}<span class="spacer"></span>
+        <span class="kicker" style="color:var(--t3)">Chain status · checked July 2026</span>
+        <span class="verdictbig disp">Is Nando's<br>halal?</span>
+        <span class="foot" style="margin-top:2.4cqw">
+          <span class="chip c-a">Partial</span>
+          <span style="color:var(--t2)">Selected branches only · 4 halal in Manchester</span>
+        </span>
+      </span></div>`
+  },
+  {
+    n:'Template 3', h:'Chain verdict — negative',
+    use:'Same template, different data. The clear answer is the value; nobody has to open the page to get it.',
+    html:`<div class="og" style="background:var(--band)">
+      <span class="pad">
+        ${brand}<span class="spacer"></span>
+        <span class="kicker" style="color:var(--t3)">Chain status · checked July 2026</span>
+        <span class="verdictbig disp">Is McDonald's<br>halal?</span>
+        <span class="foot" style="margin-top:2.4cqw">
+          <span class="chip c-r">Not halal</span>
+          <span style="color:var(--t2)">No halal certification in the UK</span>
+        </span>
+      </span></div>`
+  },
+  {
+    n:'Template 4', h:'Category / collection',
+    use:'<code>/halal-brunch-manchester</code> and every other collection page. Cuisine colour comes from the page.',
+    html:`<div class="og" style="background:#2158B415">
+      <span class="art" style="${FADE}">${art('Brunch',1200,630)}</span>
+      <span class="pad">
+        ${brand}<span class="spacer"></span>
+        <span class="kicker" style="color:#2158B4">Collection · Greater Manchester</span>
+        <span class="big disp" style="color:#123B7E">Halal Brunch<br>in Manchester</span>
+        <span class="foot"><span style="color:var(--t2)">22 verified venues · updated 30 July 2026</span></span>
+      </span></div>`
+  },
+  {
+    n:'Template 5', h:'Venue',
+    use:'<code>/venue/mylahore-manchester</code>. Score, cuisine, area and the verification line, exactly as the card shows them.',
+    html:`<div class="og" style="background:#7B2FA015">
+      <span class="art" style="${FADE}">${art('Pakistani',1200,630)}</span>
+      <span class="pad">
+        ${brand}<span class="spacer"></span>
+        <span class="kicker" style="color:#7B2FA0">Pakistani · Rusholme</span>
+        <span class="big disp" style="color:#4E1B67">MyLahore<br>Manchester</span>
+        <span class="foot" style="margin-top:2.4cqw">
+          <span class="rowline"><span class="score">9.1</span><span style="color:var(--t2)">Exceptional</span></span>
+          <span class="chip c-g">Halal</span>
+          <span style="color:var(--t2)">Confirmed with venue · Jul 2026</span>
+        </span>
+      </span></div>`
+  },
+  {
+    n:'Template 6', h:'Area',
+    use:'<code>/halal-food-rusholme</code>. Neutral ground, since an area holds every cuisine rather than one.',
+    html:`<div class="og" style="background:var(--bg)">
+      <span class="pad">
+        ${brand}<span class="spacer"></span>
+        <span class="kicker" style="color:var(--t3)">Area guide · Greater Manchester</span>
+        <span class="big disp">Halal Food<br>in Rusholme</span>
+        <span class="foot" style="margin-top:2.2cqw;gap:1cqw">
+          <span style="color:var(--t2)">58 verified venues</span>
+          <span style="color:var(--t3)">·</span>
+          <span style="color:var(--t2)">Pakistani, Turkish, Indian and more</span>
+        </span>
+      </span></div>`
+  }
+];
+
+document.getElementById('cards').innerHTML = CARDS.map(c =>
+  `<div class="item"><div class="hd"><span class="n">${c.n}</span><h2>${c.h}</h2></div>
+   <div class="use">${c.use}</div>${c.html}</div>`).join('');
+
+/* ---------------- chat context ---------------- */
+const chainCard = CARDS[1].html;
+document.getElementById('chats').innerHTML = `
+<div>
+  <span class="badlbl bad">Without og:image</span>
+  <div class="wa">
+    <div class="day">TODAY</div>
+    <div class="bub"><div class="txt">anyone know if the nando's in town is halal??</div><div class="time">19:42</div></div>
+    <div class="bub me">
+      <div class="nopreview"><div class="t">thehalalfoodindex.co.uk</div><div class="u">thehalalfoodindex.co.uk</div></div>
+      <div class="txt" style="padding-top:6px">this should tell you</div>
+      <div class="time">19:43</div>
+    </div>
+  </div>
+</div>
+<div>
+  <span class="badlbl good">With og:image</span>
+  <div class="wa">
+    <div class="day">TODAY</div>
+    <div class="bub"><div class="txt">anyone know if the nando's in town is halal??</div><div class="time">19:42</div></div>
+    <div class="bub me">
+      <div class="prev">
+        <div class="thumb"><div>${chainCard}</div></div>
+        <div class="meta">
+          <div class="t">Is Nando's halal? Branch-by-branch status</div>
+          <div class="d">Partial — selected branches only. Four confirmed halal in Manchester, last checked July 2026.</div>
+          <div class="u">thehalalfoodindex.co.uk</div>
+        </div>
+      </div>
+      <div class="txt" style="padding-top:6px">this should tell you</div>
+      <div class="time">19:43</div>
+    </div>
+  </div>
+</div>`;
+
+/* make the nested og card fill the chat thumbnail */
+document.querySelectorAll('.wa .thumb .og').forEach(el => {
+  el.style.borderRadius = '0';
+  el.style.boxShadow = 'none';
+  el.style.aspectRatio = 'auto';
+  el.style.height = '100%';
+});
+</script>
+</body>
+</html>
