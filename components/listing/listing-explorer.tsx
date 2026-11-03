@@ -478,7 +478,7 @@ function CompactCard({ v }: { v: ListingVenue }) {
     <Link
       href={`/${v.slug}`}
       prefetch={false}
-      className="relative flex min-h-[132px] w-full gap-[13px] rounded-xl border border-hfi-border bg-hfi-surface p-[17px] transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-[#D8D8D8] hover:shadow-[0_3px_13px_rgba(15,15,15,.06)] motion-reduce:hover:translate-y-0"
+      className="relative flex min-h-[132px] w-full gap-[13px] max-[640px]:min-h-0 rounded-xl border border-hfi-border bg-hfi-surface p-[17px] transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-[#D8D8D8] hover:shadow-[0_3px_13px_rgba(15,15,15,.06)] motion-reduce:hover:translate-y-0"
     >
       <span className="h-11 w-11 shrink-0 overflow-hidden rounded-[9px] [&_svg]:block [&_svg]:h-full [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: zellijFill(art) }} />
       <span className="flex min-w-0 flex-1 flex-col">
