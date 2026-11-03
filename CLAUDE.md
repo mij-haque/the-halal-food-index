@@ -17,9 +17,10 @@ Stack: Next.js 14 App Router, TypeScript, Tailwind, Supabase (Postgres 17 + Post
   Neither should be extended. Both get removed as pages are rebuilt.
 - **Supabase is live** with schema v1 (`supabase/migrations/`). The app does not read from it
   yet and `@supabase/supabase-js` is not installed yet.
-- The database holds **323 draft venues** across Greater Manchester (status `draft`,
+- The database holds **387 draft venues** across Greater Manchester (status `draft`,
   halal_status `unknown`). Nothing is published, so the public API currently returns no venues.
-  That is correct.
+  That is correct. 84 of them appear on Halal Dining MCR's Orange Card list
+  (`external_place_cache.payload.listed_by_hdm = true`), a strong halal signal for review.
 - **Certification is not part of the product** (decision 3 Nov 2026, see
   `docs/decisions-update-no-certification.md`). Ignore the certification and "certificate seen"
   parts of the venue and chain mockups.
