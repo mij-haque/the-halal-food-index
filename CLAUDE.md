@@ -90,6 +90,8 @@ Do not redesign. If something in a mockup conflicts with a decisions doc, the de
   venue itself says it is (its Google listing, website, menu or signage). Never mark a venue
   halal from its cuisine type alone. Scrapers create `draft` venues with
   `halal_status = 'unknown'`.
+- **No halal badge on venues.** Everything listed is halal, so venue cards and venue pages show
+  no "Halal" pill, tag or tick. Chain pages keep their Halal / Partial / Not halal status.
 - **Partial venues say what is halal.** If only some items are halal, use
   `halal_status = 'partial'` and put the plain-English note in `halal_scope`
   (e.g. "Chicken is halal. Beef and lamb are not.").
