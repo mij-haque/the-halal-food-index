@@ -17,8 +17,12 @@ Stack: Next.js 14 App Router, TypeScript, Tailwind, Supabase (Postgres 17 + Post
   Neither should be extended. Both get removed as pages are rebuilt.
 - **Supabase is live** with schema v1 (`supabase/migrations/`). The app does not read from it
   yet and `@supabase/supabase-js` is not installed yet.
-- The database holds **8 draft venues** (status `draft`, halal_status `unknown`). Nothing is
-  published, so the public API currently returns no venues. That is correct.
+- The database holds **323 draft venues** across Greater Manchester (status `draft`,
+  halal_status `unknown`). Nothing is published, so the public API currently returns no venues.
+  That is correct.
+- **Certification is not part of the product** (decision 3 Nov 2026, see
+  `docs/decisions-update-no-certification.md`). Ignore the certification and "certificate seen"
+  parts of the venue and chain mockups.
 - Old pre-v1 tables live in the `legacy` schema, locked from the API. Leave them alone.
 
 ## Source of truth
@@ -82,10 +86,19 @@ Do not redesign. If something in a mockup conflicts with a decisions doc, the de
 
 ## Data guardrails
 
-- **No venue gets a halal status from scraped data alone.** Scrapers create `draft` venues
-  with `halal_status = 'unknown'`. Status changes only through a human-recorded
-  `verification_events` row.
+- **No certification required.** Listings are good faith: a venue is listed as halal when the
+  venue itself says it is (its Google listing, website, menu or signage). Never mark a venue
+  halal from its cuisine type alone. Scrapers create `draft` venues with
+  `halal_status = 'unknown'`.
+- **Partial venues say what is halal.** If only some items are halal, use
+  `halal_status = 'partial'` and put the plain-English note in `halal_scope`
+  (e.g. "Chicken is halal. Beef and lamb are not.").
+- Certification fields (`certification_id`, `cert_reference`, `cert_expires_on`,
+  `certification_bodies`) and `verification_events` stay in the schema as optional extras.
+  Nothing should require them and no page should display them.
 - Nothing is published (`status = 'published'`) without the owner's sign-off.
+- **Venue names use a capital letter at the start of every word** ("Charrd", not "CHARRD").
+  Keep short acronyms (KFC, BBQ) and a brand's own inner capitals (EastZeast).
 - Never use Google, TripAdvisor or other third-party photos. Only own photos or photos with
   written permission (`venue_photos.source`).
 - Never commit secrets. Never print keys in logs or PR descriptions.
