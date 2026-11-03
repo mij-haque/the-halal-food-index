@@ -18,23 +18,14 @@ export const metadata: Metadata = {
     icon: "/icon.png",
   },
   title: {
-    default: "The Halal Food Index — Find Halal Restaurants in the UK",
+    default: "The Halal Food Index: Halal Restaurants in Greater Manchester",
     template: "%s | The Halal Food Index",
   },
   description:
-    "The UK's most comprehensive halal restaurant directory. Find HFA and HMC certified halal restaurants near you.",
-  keywords: [
-    "halal restaurants",
-    "halal food UK",
-    "halal certified",
-    "HFA",
-    "HMC",
-    "Muslim food",
-    "halal directory",
-  ],
+    "Greater Manchester's halal food guide: restaurants, cafes and takeaways that say they are halal, plus the halal status of UK chains.",
   openGraph: {
     title: "The Halal Food Index",
-    description: "Find trusted halal restaurants across the UK.",
+    description: "Greater Manchester's halal food guide.",
     siteName: "The Halal Food Index",
     locale: "en_GB",
     type: "website",
