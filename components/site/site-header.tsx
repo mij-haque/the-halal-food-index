@@ -100,7 +100,7 @@ export function SiteHeader({ placesCount }: { placesCount: number | null }) {
       <header
         className={`hfi-top sticky top-0 z-[70] border-b border-transparent bg-hfi-band transition-colors ${stuck ? "hfi-stuck" : ""}`}
       >
-        <div className="mx-auto flex h-16 max-w-[1180px] items-center gap-[26px] px-7">
+        <div className="mx-auto flex h-16 max-w-[1236px] items-center gap-[26px] px-7 max-[640px]:px-5">
           <Link className="inline-flex items-center gap-2.5 whitespace-nowrap" href={urls.home()} aria-label="The Halal Food Index, home">
             <LogoLockup size={32} />
           </Link>

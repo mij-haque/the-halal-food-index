@@ -7,7 +7,7 @@ const fhead = "mb-[14px] text-[13.5px] font-bold tracking-[-.2px]";
 
 export function SiteFooter({ currentAreaSlug }: { currentAreaSlug?: string }) {
   return (
-    <footer className="border-t border-hfi-hair bg-hfi-band px-7 pb-[26px] pt-[52px]">
+    <footer className="border-t border-hfi-hair bg-hfi-band px-7 pb-[26px] pt-[52px] max-[640px]:px-5">
       <div className="mx-auto max-w-[1180px]">
         <div className="mb-10 grid grid-cols-[1fr_auto] items-center gap-[26px] border-b border-hfi-divider pb-10 max-[1040px]:grid-cols-1 max-[1040px]:gap-4">
           <div>

@@ -318,7 +318,7 @@ export default async function VenuePage({ params }: Props) {
                   {quotableAnswer(v)}
                 </p>
               </div>
-              <a className={ctaBtn} href="#location">
+              <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
                 <PinIcon className="h-[13px] w-[13px]" />
                 Get directions
               </a>

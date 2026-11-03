@@ -29,7 +29,7 @@ export function VenueSubnav({ links }: { links: SubnavLink[] }) {
 
   return (
     <nav className="hfi-subnav sticky top-16 z-[60] border-b border-hfi-hair bg-hfi-band" aria-label="Page sections">
-      <div className="mx-auto flex h-[46px] max-w-[1180px] items-center gap-[26px] overflow-x-auto px-7">
+      <div className="mx-auto flex h-[46px] max-w-[1236px] items-center gap-[26px] overflow-x-auto px-7 max-[640px]:px-5">
         {links.map((l) => (
           <a
             key={l.id}
