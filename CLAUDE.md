@@ -12,14 +12,22 @@ Stack: Next.js 14 App Router, TypeScript, Tailwind, Supabase (Postgres 17 + Post
 
 ## Current state (read this first)
 
-- **The app still runs on mock data** (`lib/mock-data.ts`, `lib/admin-mock-data.ts`) and the
-  **retired navy/gold brand** (`tailwind.config.ts`, `app/globals.css`, `components/`).
-  Neither should be extended. Both get removed as pages are rebuilt.
-- **Supabase is live** with schema v1 (`supabase/migrations/`). The app does not read from it
-  yet and `@supabase/supabase-js` is not installed yet.
-- The database holds **323 draft venues** across Greater Manchester (status `draft`,
-  halal_status `unknown`). Nothing is published, so the public API currently returns no venues.
-  That is correct.
+- **The public site reads live from Supabase** (anon key, RLS). Rebuilt pages live in the
+  `app/(site)` route group with the HFI brand (`hfi-*` Tailwind tokens, `app/(site)/site.css`).
+  The old navy/gold mock pages, mock data and admin mock-up have been removed.
+- **Routes** (patterns in `lib/site.ts`):
+  - `/halal-restaurants-manchester`: flagship listing, `app/(site)/halal-restaurants-manchester`
+  - `/{slug}`: one route (`app/(site)/[slug]`) that serves area listings
+    (`/halal-restaurants-{area}-manchester`), cuisine listings (`/halal-{cuisine}-manchester`)
+    and venue pages, in that order. Unknown or unpublished slugs 404.
+  - `/` redirects (temporary) to the flagship until the homepage is built.
+  - `sitemap.xml` and `robots.txt` are generated (`app/sitemap.ts`, `app/robots.ts`).
+- Category pages with fewer than 5 listings render but are `noindex, follow`
+  (`MIN_LISTINGS_TO_INDEX` in `lib/listings.ts`) and are left out of the sitemap.
+- Venues are added as `draft`, moved to `review`, and only become `published` with the
+  owner's sign-off. Only published venues appear anywhere on the site.
+- Not in the data yet: opening hours, photos, map, price, ratings. Pages show honest
+  placeholders or leave those parts out. Filters exist only for facets with data.
 - **Certification is not part of the product** (decision 3 Nov 2026, see
   `docs/decisions-update-no-certification.md`). Ignore the certification and "certificate seen"
   parts of the venue and chain mockups.
@@ -105,15 +113,13 @@ Do not redesign. If something in a mockup conflicts with a decisions doc, the de
   written permission (`venue_photos.source`).
 - Never commit secrets. Never print keys in logs or PR descriptions.
 
-## Suggested build order
+## Build order
 
-1. Add the Supabase client (server-side helper using the anon key) and typed queries.
-2. Venue page `app/(public)/[slug]` from `design/venue-baraka-kitchen.html`, reading from
-   `venues` + `venue_current_verification`.
-3. Listing page from `design/listing-manchester.html`.
+1. ~~Supabase client and typed queries~~ (`lib/supabase/server.ts`, `lib/venues.ts`, `lib/listings.ts`)
+2. ~~Venue page~~ (`components/venue/venue-view.tsx`)
+3. ~~Listing page + area and cuisine pages~~ (`components/listing/`)
 4. Chain page from `design/chain-nandos-v12.html` (`chains`, `chain_items`,
    `chain_branch_status`).
-5. Homepage from `design/homepage-v10.html`.
-6. Remove mock data and navy/gold tokens once nothing imports them.
+5. Homepage from `design/homepage-v10.html` (then drop the `/` redirect in `next.config.mjs`).
 
 Work on a branch and open a PR. Do not push to `main`.

@@ -224,3 +224,11 @@ html:has(.hfi-site) {
   --hfi-surface: #fafafa;
   --hfi-border: #e6e6e6;
 }
+
+/* listing sort select: custom chevron */
+.hfi-sortsel {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2351514E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  background-size: 13px;
+}

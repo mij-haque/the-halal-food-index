@@ -171,12 +171,53 @@ export function zellijSvg(id: string, colour: string, kind: ZellijKind, unit = 6
 
 const KINDS: ZellijKind[] = ["strap", "circles", "stars", "rosette"];
 
-/** Stable per-venue choice of construction and scale, so tiles don't all match. */
-export function zellijFor(seed: string): { kind: ZellijKind; unit: number } {
+function hash(seed: string): number {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+/** Stable per-venue choice of construction and scale, so tiles don't all match. */
+export function zellijFor(seed: string): { kind: ZellijKind; unit: number } {
+  const h = hash(seed);
   return { kind: KINDS[h % KINDS.length], unit: 56 + (h % 17) };
 }
 
-/** Used when a venue has no cuisine yet: muted, not a brand or semantic colour. */
-export const NEUTRAL_ART = "#6B6B66";
+// Mockup palette minus greens (green is reserved for halal/open-now signals).
+const FALLBACK_ART = ["#A8501B", "#5237B8", "#B23C10", "#7B2FA0", "#B0630A", "#0C6B85", "#B32424", "#B02463"];
+
+export type VenueArt = { key: string; col: string; kind: ZellijKind; unit: number };
+
+/**
+ * One art treatment per cuisine (colour from the cuisines table), so a list of
+ * cards stays calm. Venues without a cuisine get a stable fallback by slug.
+ * `key` is safe to use in an SVG id.
+ */
+export function venueArt(slug: string, cuisine?: { slug: string; colour_hex: string } | null): VenueArt {
+  if (cuisine) {
+    const { kind, unit } = zellijFor(cuisine.slug);
+    return { key: `c-${cuisine.slug.replace(/[^a-z0-9-]/g, "")}`, col: safeHex(cuisine.colour_hex), kind, unit };
+  }
+  const h = hash(slug);
+  const ci = h % FALLBACK_ART.length;
+  const kind = KINDS[Math.floor(h / FALLBACK_ART.length) % KINDS.length];
+  return { key: `f-${ci}-${kind}`, col: FALLBACK_ART[ci], kind, unit: 60 };
+}
+
+/** A <pattern> element for a shared sprite. Reference it with zellijFill(). */
+export function zellijPattern(art: VenueArt): string {
+  return `<pattern id="zp-${art.key}" patternUnits="userSpaceOnUse" width="${art.unit}" height="${art.unit}">${cell(
+    art.kind,
+    art.col,
+    art.unit,
+  )}</pattern>`;
+}
+
+/** A small SVG that fills itself with a pattern already defined on the page. */
+export function zellijFill(art: VenueArt, width = 240, height = 192, bgOpacity = 0.075): string {
+  return (
+    `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">` +
+    `<rect width="${width}" height="${height}" fill="${art.col}" opacity="${bgOpacity}"/>` +
+    `<rect width="${width}" height="${height}" fill="url(#zp-${art.key})"/></svg>`
+  );
+}
