@@ -1,0 +1,226 @@
+/*
+ * HFI brand: the few rules Tailwind utilities can't express cleanly.
+ * Ported from design/venue-baraka-kitchen.html. Everything is prefixed
+ * with hfi- so nothing collides with the retired navy/gold styles.
+ */
+
+.hfi-site {
+  font-family: var(--font-instrument), system-ui, -apple-system, sans-serif;
+  background: #fcfcfc;
+  color: #0f0f0f;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+.hfi-site h1,
+.hfi-site h2,
+.hfi-site h3,
+.hfi-site h4 {
+  color: #0f0f0f;
+}
+.hfi-site :focus {
+  outline: none;
+}
+.hfi-site :focus-visible {
+  outline: 2px solid #0f0f0f;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+html:has(.hfi-site) {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* display type: Bricolage Grotesque with optical sizing */
+.hfi-display-xl {
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 800;
+  font-size: clamp(30px, 4.6vw, 48px);
+  letter-spacing: -2px;
+  line-height: 1.05;
+  font-variation-settings: "opsz" 96;
+}
+.hfi-display-md {
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  letter-spacing: -1.15px;
+  line-height: 1.12;
+  font-variation-settings: "opsz" 40;
+}
+.hfi-wordmark {
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.6px;
+  font-variation-settings: "opsz" 16;
+  line-height: 1;
+}
+.hfi-qmark {
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 800;
+}
+@media (max-width: 640px) {
+  .hfi-display-xl {
+    font-size: 30px;
+  }
+  .hfi-display-md {
+    font-size: 23px;
+    letter-spacing: -0.9px;
+    font-variation-settings: "opsz" 28;
+  }
+}
+
+/* inline SVG art fills its box */
+.hfi-art {
+  position: absolute;
+  inset: 0;
+}
+.hfi-art svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* similar-spot tiles fade the pattern out behind the caption */
+.hfi-tile-art {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 42%, rgba(0, 0, 0, 0.12) 78%, rgba(0, 0, 0, 0) 96%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 42%, rgba(0, 0, 0, 0.12) 78%, rgba(0, 0, 0, 0) 96%);
+}
+
+/* map pin */
+.hfi-locpin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -115%);
+  width: 38px;
+  height: 38px;
+  background: #0b6b45;
+  border-radius: 50% 50% 50% 0;
+  box-shadow: 0 4px 10px rgba(15, 15, 15, 0.25);
+  z-index: 2;
+}
+.hfi-locpin::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+/* report toggle */
+.hfi-report summary {
+  list-style: none;
+}
+.hfi-report summary::-webkit-details-marker {
+  display: none;
+}
+.hfi-report[open] summary svg {
+  transform: rotate(180deg);
+}
+
+/* sticky header hairline once scrolled */
+.hfi-top.hfi-stuck {
+  border-bottom-color: #e4e4e4;
+}
+
+/* sub-nav active state: ink, never green (CLAUDE.md colour discipline) */
+.hfi-subnav a.hfi-active {
+  color: #0f0f0f;
+}
+.hfi-subnav a.hfi-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: #0f0f0f;
+  border-radius: 2px;
+}
+
+/* menu drawer + search palette */
+@keyframes hfi-morph {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hfi-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes hfi-slidein {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes hfi-sheetup {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+.hfi-pal {
+  animation: hfi-morph 0.24s cubic-bezier(0.22, 0.78, 0.24, 1) both;
+}
+.hfi-menu-scrim {
+  animation: hfi-fade 0.22s ease-out both;
+}
+.hfi-drawer {
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+  animation: hfi-slidein 0.3s cubic-bezier(0.22, 0.8, 0.24, 1) both;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .hfi-drawer {
+    background: #fff;
+    border-left: 1px solid #e4e4e4;
+  }
+}
+@media (prefers-contrast: more) {
+  .hfi-drawer {
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-left: 1px solid #e4e4e4;
+  }
+}
+@media (max-width: 640px) {
+  .hfi-pal {
+    animation: hfi-sheetup 0.3s cubic-bezier(0.22, 0.8, 0.24, 1) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.hfi-site) {
+    scroll-behavior: auto;
+  }
+  .hfi-pal,
+  .hfi-drawer,
+  .hfi-menu-scrim {
+    animation: none;
+  }
+}
+
+/* white "band" sections lift cards a touch (mockup: section.band) */
+.hfi-band {
+  --hfi-surface: #fafafa;
+  --hfi-border: #e6e6e6;
+}
