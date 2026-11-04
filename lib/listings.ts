@@ -1,7 +1,8 @@
 import { cache } from "react";
 import { supabaseRead } from "@/lib/supabase/server";
 import { noEmDash, urls } from "@/lib/site";
-import { typeLabel, type Area, type Cuisine } from "@/lib/venues";
+import type { Area, Cuisine } from "@/lib/venues";
+import { asWeekHours, type WeekHours } from "@/lib/hours";
 
 /*
  * Data for the listing template (docs/decisions-update-listing-page.md):
@@ -22,6 +23,10 @@ export type ListingVenue = {
   cuisines: Array<{ slug: string; name: string; colour_hex: string }>;
   partialScope: string | null; // set only for partial venues
   servesAlcohol: boolean | null;
+  /** Google Maps facts (cached by the maps-refresh job). Null when we don't hold them. */
+  rating: number | null;
+  reviewCount: number | null;
+  hours: WeekHours | null;
   lat: number | null;
   lng: number | null;
   publishedAt: string | null;
@@ -65,17 +70,34 @@ type Row = {
 };
 
 /** Every published venue, ordered A to Z. Deduplicated per request. */
+type PlaceFacts = { slug: string; rating: number | null; review_count: number | null; hours: unknown };
+
+/**
+ * Google Maps facts for published venues, while fresh. Optional by design:
+ * if the call fails the site still works, just without hours and ratings.
+ */
+const getPlaceFacts = cache(async (): Promise<Map<string, PlaceFacts>> => {
+  const { data, error } = await supabaseRead().rpc("venue_place_facts");
+  if (error || !Array.isArray(data)) return new Map();
+  return new Map((data as PlaceFacts[]).map((f) => [f.slug, f]));
+});
+
 export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
-  const { data, error } = await supabaseRead()
-    .from("venues")
-    .select(
-      "slug, name, venue_type, halal_status, halal_scope, serves_alcohol, location, published_at, area:areas(slug, name), venue_cuisines(is_primary, cuisine:cuisines(id, slug, name, colour_hex))",
-    )
-    .eq("status", "published")
-    .order("name");
+  const [{ data, error }, facts] = await Promise.all([
+    supabaseRead()
+      .from("venues")
+      .select(
+        "slug, name, venue_type, halal_status, halal_scope, serves_alcohol, location, published_at, area:areas(slug, name), venue_cuisines(is_primary, cuisine:cuisines(id, slug, name, colour_hex))",
+      )
+      .eq("status", "published")
+      .order("name"),
+    getPlaceFacts(),
+  ]);
   if (error) throw new Error(`Listing query failed: ${error.message}`);
 
   return ((data ?? []) as unknown as Row[]).map((r) => {
+    const f = facts.get(r.slug);
+    const rating = f?.rating != null ? Number(f.rating) : NaN;
     const point = parsePoint(r.location);
     const cuisines = (r.venue_cuisines ?? [])
       .filter((l) => l.cuisine)
@@ -89,6 +111,9 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
       cuisines,
       partialScope: r.halal_status === "partial" && r.halal_scope ? noEmDash(r.halal_scope.trim()) : null,
       servesAlcohol: r.serves_alcohol,
+      rating: Number.isFinite(rating) && rating > 0 ? Math.round(rating * 10) / 10 : null,
+      reviewCount: f?.review_count != null && f.review_count > 0 ? f.review_count : null,
+      hours: asWeekHours(f?.hours),
       lat: point?.lat ?? null,
       lng: point?.lng ?? null,
       publishedAt: r.published_at,
@@ -131,17 +156,6 @@ export function cuisineFacets(list: ListingVenue[]): Facet[] {
     }
   }
   return [...m.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-}
-
-const TYPE_ORDER = ["restaurant", "cafe", "takeaway", "bakery"];
-const TYPE_PLURAL: Record<string, string> = { restaurant: "Restaurants", cafe: "Cafés", takeaway: "Takeaways", bakery: "Bakeries" };
-
-export function typeFacets(list: ListingVenue[]): Facet[] {
-  const m = new Map<string, number>();
-  for (const v of list) m.set(v.type, (m.get(v.type) ?? 0) + 1);
-  return [...m.entries()]
-    .sort((a, b) => TYPE_ORDER.indexOf(a[0]) - TYPE_ORDER.indexOf(b[0]))
-    .map(([slug, count]) => ({ slug, name: TYPE_PLURAL[slug] ?? `${typeLabel(slug)}s`, count }));
 }
 
 /* ── category page wording ── */

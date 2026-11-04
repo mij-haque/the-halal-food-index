@@ -8,7 +8,6 @@ import {
   cuisineFacets,
   lastUpdated,
   relatedLinks,
-  typeFacets,
   type ListingVenue,
 } from "@/lib/listings";
 import { ListingExplorer } from "@/components/listing/listing-explorer";
@@ -142,7 +141,6 @@ export function ListingView(p: ListingPageProps) {
 
       <ListingExplorer
         venues={p.venues}
-        types={typeFacets(p.venues)}
         areas={p.locked === "area" ? [] : areaFacets(p.venues)}
         cuisines={p.locked === "cuisine" ? [] : cuisineFacets(p.venues)}
         showScopeFilter={p.venues.some((v) => v.partialScope)}

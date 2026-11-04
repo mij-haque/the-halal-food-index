@@ -453,6 +453,42 @@ export type Database = {
           },
         ]
       }
+      maps_refresh_runs: {
+        Row: {
+          apify_run_id: string
+          dataset_id: string | null
+          finished_at: string | null
+          id: string
+          kind: string
+          requested: Json
+          result: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          apify_run_id: string
+          dataset_id?: string | null
+          finished_at?: string | null
+          id?: string
+          kind: string
+          requested: Json
+          result?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          apify_run_id?: string
+          dataset_id?: string | null
+          finished_at?: string | null
+          id?: string
+          kind?: string
+          requested?: Json
+          result?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
           address: string | null
@@ -838,7 +874,25 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      maps_due_venues: {
+        Args: { p_limit?: number }
+        Returns: {
+          place_id: string
+          search_text: string
+          venue_id: string
+        }[]
+      }
+      maps_refresh_key_ok: { Args: { p_key: string }; Returns: boolean }
+      venue_place_facts: {
+        Args: never
+        Returns: {
+          checked_at: string
+          hours: Json
+          rating: number
+          review_count: number
+          slug: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
