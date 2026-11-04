@@ -208,13 +208,29 @@ html:has(.hfi-site) {
     animation: hfi-sheetup 0.3s cubic-bezier(0.22, 0.8, 0.24, 1) both;
   }
 }
+/* listing: result count nudges when filters change */
+@keyframes hfi-tick {
+  from {
+    opacity: 0.25;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hfi-tick {
+  display: inline-block;
+  animation: hfi-tick 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 @media (prefers-reduced-motion: reduce) {
   html:has(.hfi-site) {
     scroll-behavior: auto;
   }
   .hfi-pal,
   .hfi-drawer,
-  .hfi-menu-scrim {
+  .hfi-menu-scrim,
+  .hfi-tick {
     animation: none;
   }
 }
@@ -223,4 +239,12 @@ html:has(.hfi-site) {
 .hfi-band {
   --hfi-surface: #fafafa;
   --hfi-border: #e6e6e6;
+}
+
+/* listing sort select: custom chevron */
+.hfi-sortsel {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2351514E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  background-size: 13px;
 }
