@@ -20,7 +20,9 @@ export const urls = {
   area: (areaSlug: string) => `/halal-restaurants-${areaSlug}-manchester`,
   cuisine: (cuisineSlug: string) => `/halal-${cuisineSlug}-manchester`,
   chain: (chainSlug: string) => `/is-${chainSlug}-halal`,
-  // Not built yet. Kept here so the links are easy to repoint.
+  about: () => "/about",
+  privacy: () => "/privacy",
+  // Not built yet. Nothing links here until the page exists.
   allChains: () => "/chains",
   collections: () => "/collections",
   addRestaurant: () => "/add-a-restaurant",
@@ -28,22 +30,22 @@ export const urls = {
   contact: () => "/contact",
   aboutListings: () => "/about-our-listings",
   terms: () => "/terms",
-  privacy: () => "/privacy",
   cookies: () => "/cookies",
 };
+
+/** Shown on the Privacy page. Null until the owner chooses a public address. */
+export const CONTACT_EMAIL: string | null = null;
 
 export const absolute = (path: string) => `${SITE_URL}${path === "/" ? "/" : path}`;
 
 export const primaryNav = [
   { label: "Cuisines", href: urls.flagship() },
   { label: "Areas", href: urls.flagship() },
-  { label: "Chains", href: urls.allChains() },
-  { label: "Collections", href: urls.collections() },
+  { label: "About", href: urls.about() },
 ];
 
 export const footerCuisines = [
   { label: "Indian", href: urls.cuisine("indian") },
-  { label: "Pakistani", href: urls.cuisine("pakistani") },
   { label: "Burgers", href: urls.cuisine("burgers") },
   { label: "Desserts", href: urls.cuisine("desserts") },
   { label: "Brunch", href: urls.cuisine("brunch") },
@@ -56,14 +58,6 @@ export const footerAreas = [
   { label: "Longsight", slug: "longsight" },
   { label: "Cheetham Hill", slug: "cheetham-hill" },
   { label: "Chorlton", slug: "chorlton" },
-];
-
-export const footerChains = [
-  { label: "Is Nando's halal?", href: urls.chain("nandos") },
-  { label: "Is KFC halal?", href: urls.chain("kfc") },
-  { label: "Is Subway halal?", href: urls.chain("subway") },
-  { label: "Is McDonald's halal?", href: urls.chain("mcdonalds") },
-  { label: "All chains", href: urls.allChains() },
 ];
 
 /** Links offered in the search palette until real search exists. */
