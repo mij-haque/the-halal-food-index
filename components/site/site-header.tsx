@@ -165,11 +165,8 @@ export function SiteHeader({ placesCount }: { placesCount: number | null }) {
             </div>
             <div className="pb-1.5 pt-5 text-[10.5px] font-bold uppercase tracking-[.11em] text-hfi-t3">The index</div>
             <div>
-              <Link href={urls.addRestaurant()} className={mlink}>
-                Add a restaurant
-              </Link>
-              <Link href={urls.reportProblem()} className={mlink}>
-                Report a problem
+              <Link href={urls.privacy()} className={mlink}>
+                Privacy
               </Link>
             </div>
             <p className="mt-[18px] border-t border-hfi-divider pt-[14px] text-xs leading-[1.6] text-hfi-t3">

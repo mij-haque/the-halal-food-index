@@ -7,7 +7,7 @@ export const revalidate = 600;
 
 const HEADING = "Halal Restaurants, Cafés & Takeaways in Manchester";
 const LEDE =
-  "Every place here says it serves halal food, on its own menu, website or signage, or is featured by a trusted local halal food guide. Filter by type, area or cuisine to find somewhere near you.";
+  "Every place here says it serves halal food, on its own menu, website or signage, or is featured by a trusted local halal food guide. Filter by area or cuisine to find somewhere near you.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const all = await getPublishedVenues();
