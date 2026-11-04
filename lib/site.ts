@@ -38,7 +38,7 @@ export const urls = {
  * and no cookie banner. Tags only load on the live domains below, never on
  * Vercel previews.
  */
-export const GTM_ID: string | null = null;
+export const GTM_ID: string | null = "GTM-5J25WWLT";
 export const LIVE_HOSTS = ["thehalalfoodindex.co.uk", "www.thehalalfoodindex.co.uk"];
 
 /** Shown on the Privacy page. Null until the owner chooses a public address. */
