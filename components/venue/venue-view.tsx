@@ -302,32 +302,44 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
           </div>
           <h1 className="hfi-display-xl">{v.name}</h1>
 
-          <div className="mb-[22px] mt-3 flex flex-wrap items-center gap-2.5 text-sm text-hfi-t2">
-            {metaBits.map((m, i) => (
-              <span key={`${m}-${i}`} className="contents">
-                {i > 0 && <span className="text-hfi-t3">·</span>}
-                <span>{m}</span>
-              </span>
-            ))}
-            {v.rating != null && (
-              <span className="contents">
-                {metaBits.length > 0 && <span className="text-hfi-t3">·</span>}
-                <span className="inline-flex items-center gap-1">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-[13px] w-[13px] text-hfi-ink" aria-hidden="true">
-                    <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4-5.7-3.1-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" />
-                  </svg>
-                  <b className="font-semibold text-hfi-ink">{v.rating.toFixed(1)}</b>
-                  {v.reviewCount != null ? (
-                    <span>
-                      ({shortCount(v.reviewCount)} Google review{v.reviewCount === 1 ? "" : "s"})
-                    </span>
-                  ) : (
-                    <span>on Google</span>
-                  )}
-                </span>
+          {/* two groups so a separator dot never dangles at a line end; on phones
+              the rating and open/closed pill always get their own line */}
+          <div className="mb-[22px] mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-sm text-hfi-t2">
+            {metaBits.length > 0 && (
+              <span className="flex flex-wrap items-center gap-2.5">
+                {metaBits.map((m, i) => (
+                  <span key={`${m}-${i}`} className="contents">
+                    {i > 0 && <span className="text-hfi-t3">·</span>}
+                    <span>{m}</span>
+                  </span>
+                ))}
               </span>
             )}
-            <LiveStatus hours={v.hours} />
+            {metaBits.length > 0 && v.rating != null && (
+              <span className="text-hfi-t3 max-[640px]:hidden" aria-hidden="true">
+                ·
+              </span>
+            )}
+            <span className="flex flex-wrap items-center gap-2.5 empty:hidden max-[640px]:basis-full">
+              {v.rating != null && (
+                <span className="contents">
+                  <span className="inline-flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-[13px] w-[13px] text-hfi-ink" aria-hidden="true">
+                      <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4-5.7-3.1-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" />
+                    </svg>
+                    <b className="font-semibold text-hfi-ink">{v.rating.toFixed(1)}</b>
+                    {v.reviewCount != null ? (
+                      <span>
+                        ({shortCount(v.reviewCount)} Google review{v.reviewCount === 1 ? "" : "s"})
+                      </span>
+                    ) : (
+                      <span>on Google</span>
+                    )}
+                  </span>
+                </span>
+              )}
+              <LiveStatus hours={v.hours} />
+            </span>
           </div>
 
           {/* phones: one row of equal tiles, icon over label (BestDubai / Maps style) */}
