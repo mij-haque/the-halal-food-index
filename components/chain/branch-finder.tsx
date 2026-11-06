@@ -206,7 +206,7 @@ export function BranchFinder({ chainName, branches }: { chainName: string; branc
             <span>
               {view.searching
                 ? `${view.other.length} matching branch${view.other.length === 1 ? "" : "es"}, not halal`
-                : `${totalOther} other branches checked, not halal`}
+                : `${totalOther} other branches, not halal`}
             </span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-[14px] w-[14px] shrink-0 text-hfi-t3 transition-transform duration-200" aria-hidden="true">
               <path d="m6 9 6 6 6-6" />
