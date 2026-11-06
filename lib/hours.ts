@@ -13,7 +13,11 @@ export type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 export type WeekHours = Partial<Record<DayKey, number[][]>>;
 export type OpenStatus = { tone: "open" | "soon" | "closed"; label: string };
 
-const ORDER: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+export const DAYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+const ORDER = DAYS;
+export const DAY_NAME: Record<DayKey, string> = {
+  mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday", sat: "Saturday", sun: "Sunday",
+};
 const SHORT: Record<DayKey, string> = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
 const CLOSING_SOON_MINS = 60;
 
@@ -25,7 +29,7 @@ const londonFmt = new Intl.DateTimeFormat("en-GB", {
   hourCycle: "h23",
 });
 
-function londonNow(at: Date): { day: DayKey; mins: number } {
+export function londonNow(at: Date): { day: DayKey; mins: number } {
   const parts = londonFmt.formatToParts(at);
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
   const day = get("weekday").slice(0, 3).toLowerCase() as DayKey;
@@ -90,4 +94,46 @@ export function openStatus(hours: WeekHours | null | undefined, at: Date): OpenS
     }
   }
   return { tone: "closed", label: "Closed" };
+}
+
+/** 24-hour clock for the hours table: 660 -> "11:00", 1440 -> "00:00". */
+function hhmm(m: number): string {
+  const t = ((m % 1440) + 1440) % 1440;
+  return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
+}
+
+/** One day's hours as shown in the table. */
+export function dayText(ranges: number[][] | undefined): string {
+  if (ranges === undefined) return "Not listed";
+  if (ranges.length === 0) return "Closed";
+  if (ranges.length === 1 && ranges[0][0] === 0 && ranges[0][1] >= 1440) return "Open 24 hours";
+  return ranges.map(([s, e]) => `${hhmm(s)} \u2013 ${hhmm(e)}`).join(", ");
+}
+
+/**
+ * schema.org openingHoursSpecification, only when all seven days are known
+ * (so it never claims more than the table shows). Days with the same hours
+ * are grouped.
+ */
+export function openingHoursSpec(hours: WeekHours | null | undefined) {
+  if (!hours || DAYS.some((d) => hours[d] === undefined)) return null;
+  const groups = new Map<string, { opens: string; closes: string; days: string[] }>();
+  for (const d of DAYS) {
+    for (const [s, e] of hours[d] ?? []) {
+      const allDay = s === 0 && e >= 1440;
+      const opens = hhmm(s);
+      const closes = allDay ? "23:59" : hhmm(e);
+      const key = `${opens}-${closes}`;
+      const g = groups.get(key) ?? { opens, closes, days: [] };
+      g.days.push(DAY_NAME[d]);
+      groups.set(key, g);
+    }
+  }
+  if (!groups.size) return null;
+  return [...groups.values()].map((g) => ({
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: g.days,
+    opens: g.opens,
+    closes: g.closes,
+  }));
 }

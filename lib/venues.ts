@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { supabaseRead } from "@/lib/supabase/server";
 import { noEmDash } from "@/lib/site";
+import type { WeekHours } from "@/lib/hours";
+import { NO_FACTS, getPlaceFacts } from "@/lib/place-facts";
 
 /* ── types ── */
 
@@ -29,6 +31,10 @@ export type Venue = {
   updated_at: string | null;
   area: Area | null;
   cuisines: Cuisine[]; // primary first
+  /** Google Maps facts (maps-refresh job). Null when we don't hold them. */
+  rating: number | null;
+  reviewCount: number | null;
+  hours: WeekHours | null;
 };
 
 export type VenueTile = {
@@ -68,17 +74,15 @@ const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 /** One published venue by slug, or null. Deduplicated per request. */
 export const getVenue = cache(async (slug: string): Promise<Venue | null> => {
   if (!SLUG_RE.test(slug) || slug.length > 120) return null;
-  const { data, error } = await supabaseRead()
-    .from("venues")
-    .select(VENUE_SELECT)
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  const [{ data, error }, facts] = await Promise.all([
+    supabaseRead().from("venues").select(VENUE_SELECT).eq("slug", slug).eq("status", "published").maybeSingle(),
+    getPlaceFacts(),
+  ]);
   if (error) throw new Error(`Venue query failed: ${error.message}`);
   if (!data) return null;
-  const row = data as unknown as Omit<Venue, "cuisines"> & { venue_cuisines: CuisineLink[] };
+  const row = data as unknown as Omit<Venue, "cuisines" | "rating" | "reviewCount" | "hours"> & { venue_cuisines: CuisineLink[] };
   const { venue_cuisines, ...rest } = row;
-  return { ...rest, tags: rest.tags ?? [], cuisines: orderedCuisines(venue_cuisines) };
+  return { ...rest, tags: rest.tags ?? [], cuisines: orderedCuisines(venue_cuisines), ...(facts.get(rest.slug) ?? NO_FACTS) };
 });
 
 type TileRow = { id: string; slug: string; name: string; area: { name: string } | null; venue_cuisines: CuisineLink[] };

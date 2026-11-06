@@ -90,3 +90,10 @@ export const paletteLinks = [
 export function noEmDash(text: string): string {
   return text.replace(/\s*—\s*/g, ", ");
 }
+
+/** Review counts: "630", "12.8k". */
+export function shortCount(n: number): string {
+  if (n < 1000) return String(n);
+  const k = Math.round(n / 100) / 10;
+  return `${k % 1 === 0 ? k.toFixed(0) : k}k`;
+}

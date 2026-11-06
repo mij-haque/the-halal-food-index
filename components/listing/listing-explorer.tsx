@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { venueArt, zellijFill } from "@/lib/art";
 import { openStatus, type OpenStatus } from "@/lib/hours";
+import { shortCount } from "@/lib/site";
+import { useNow } from "@/lib/use-now";
 import type { Facet, ListingVenue } from "@/lib/listings";
 import { CloseIcon, PinIcon } from "@/components/site/icons";
 
@@ -46,17 +48,6 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const a =
     Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-/** The time now, ticking each minute. Null on the server and first render. */
-function useNow(): Date | null {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    setNow(new Date());
-    const id = window.setInterval(() => setNow(new Date()), 60_000);
-    return () => window.clearInterval(id);
-  }, []);
-  return now;
 }
 
 const roundBtn =
@@ -496,12 +487,6 @@ function StatusPill({ status }: { status: OpenStatus }) {
       {status.label}
     </span>
   );
-}
-
-function shortCount(n: number): string {
-  if (n < 1000) return String(n);
-  const k = Math.round(n / 100) / 10;
-  return `${k % 1 === 0 ? k.toFixed(0) : k}k`;
 }
 
 function Rating({ v }: { v: ListingVenue }) {

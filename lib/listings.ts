@@ -2,7 +2,8 @@ import { cache } from "react";
 import { supabaseRead } from "@/lib/supabase/server";
 import { noEmDash, urls } from "@/lib/site";
 import type { Area, Cuisine } from "@/lib/venues";
-import { asWeekHours, type WeekHours } from "@/lib/hours";
+import type { WeekHours } from "@/lib/hours";
+import { NO_FACTS, getPlaceFacts } from "@/lib/place-facts";
 
 /*
  * Data for the listing template (docs/decisions-update-listing-page.md):
@@ -70,18 +71,6 @@ type Row = {
 };
 
 /** Every published venue, ordered A to Z. Deduplicated per request. */
-type PlaceFacts = { slug: string; rating: number | null; review_count: number | null; hours: unknown };
-
-/**
- * Google Maps facts for published venues, while fresh. Optional by design:
- * if the call fails the site still works, just without hours and ratings.
- */
-const getPlaceFacts = cache(async (): Promise<Map<string, PlaceFacts>> => {
-  const { data, error } = await supabaseRead().rpc("venue_place_facts");
-  if (error || !Array.isArray(data)) return new Map();
-  return new Map((data as PlaceFacts[]).map((f) => [f.slug, f]));
-});
-
 export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
   const [{ data, error }, facts] = await Promise.all([
     supabaseRead()
@@ -96,8 +85,7 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
   if (error) throw new Error(`Listing query failed: ${error.message}`);
 
   return ((data ?? []) as unknown as Row[]).map((r) => {
-    const f = facts.get(r.slug);
-    const rating = f?.rating != null ? Number(f.rating) : NaN;
+    const f = facts.get(r.slug) ?? NO_FACTS;
     const point = parsePoint(r.location);
     const cuisines = (r.venue_cuisines ?? [])
       .filter((l) => l.cuisine)
@@ -111,9 +99,9 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
       cuisines,
       partialScope: r.halal_status === "partial" && r.halal_scope ? noEmDash(r.halal_scope.trim()) : null,
       servesAlcohol: r.serves_alcohol,
-      rating: Number.isFinite(rating) && rating > 0 ? Math.round(rating * 10) / 10 : null,
-      reviewCount: f?.review_count != null && f.review_count > 0 ? f.review_count : null,
-      hours: asWeekHours(f?.hours),
+      rating: f.rating,
+      reviewCount: f.reviewCount,
+      hours: f.hours,
       lat: point?.lat ?? null,
       lng: point?.lng ?? null,
       publishedAt: r.published_at,

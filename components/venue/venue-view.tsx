@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { venueArt, zellijSvg, type ZellijKind } from "@/lib/art";
-import { SITE_NAME, SITE_URL, absolute, urls } from "@/lib/site";
+import { SITE_NAME, SITE_URL, absolute, shortCount, urls } from "@/lib/site";
+import { openingHoursSpec } from "@/lib/hours";
 import {
   directionsHref,
   fullAddress,
@@ -18,6 +19,7 @@ import {
 } from "@/lib/venues";
 import { VenueSubnav, type SubnavLink } from "@/components/venue/venue-subnav";
 import { ReportChange } from "@/components/venue/report-change";
+import { HoursTable, OpenStatusPill } from "@/components/venue/venue-hours";
 import { AlertIcon, CheckIcon, GlassIcon, GlobeIcon, PhoneIcon, PhotoIcon, PinIcon } from "@/components/site/icons";
 
 /*
@@ -25,8 +27,9 @@ import { AlertIcon, CheckIcon, GlassIcon, GlobeIcon, PhoneIcon, PhotoIcon, PinIc
  * no-certification decision applied (docs/decisions-update-no-certification.md):
  * no halal badge, no certificate proof, no "checked" dates. Partial venues get
  * the scope note. Alcohol and shared-kitchen facts show only when known.
- * Opening hours, photos and the map are not in the data yet, so they are left
- * out or shown as honest placeholders.
+ * Opening hours, star rating and review count come from Google Maps (the
+ * maps-refresh job); the rating is shown as Google's, never in structured data.
+ * Photos and the map are not in the data yet, so they are honest placeholders.
  */
 
 /* ── helpers ── */
@@ -60,6 +63,7 @@ function jsonLd(v: Venue) {
   ];
   const placeType = v.venue_type === "cafe" ? "CafeOrCoffeeShop" : v.venue_type === "bakery" ? "Bakery" : "Restaurant";
   const summary = summaryText(v);
+  const hoursSpec = openingHoursSpec(v.hours);
 
   return {
     "@context": "https://schema.org",
@@ -104,6 +108,7 @@ function jsonLd(v: Venue) {
               },
             }
           : {}),
+        ...(hoursSpec ? { openingHoursSpecification: hoursSpec } : {}),
       },
       {
         "@type": "WebPage",
@@ -266,6 +271,24 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
                 <span>{m}</span>
               </span>
             ))}
+            {v.rating != null && (
+              <span className="contents">
+                {metaBits.length > 0 && <span className="text-hfi-t3">·</span>}
+                <span className="inline-flex items-center gap-1">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-[13px] w-[13px] text-hfi-ink" aria-hidden="true">
+                    <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4-5.7-3.1-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" />
+                  </svg>
+                  <b className="font-semibold text-hfi-ink">{v.rating.toFixed(1)}</b>
+                  {v.reviewCount != null ? (
+                    <span>
+                      ({shortCount(v.reviewCount)} Google review{v.reviewCount === 1 ? "" : "s"})
+                    </span>
+                  ) : (
+                    <span>on Google</span>
+                  )}
+                </span>
+              </span>
+            )}
           </div>
 
           <div className="relative mb-[26px]">
@@ -338,6 +361,7 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
                   </div>
                 )}
               </div>
+              <OpenStatusPill hours={v.hours} />
               {summary ? (
                 <p className={secS}>{summary}</p>
               ) : (
@@ -420,7 +444,16 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
                   <a href={`tel:${telHref(v.phone)}`}>{v.phone}</a>
                 </p>
               )}
-              <p className="mb-[22px] mt-[14px] text-[13px] text-hfi-t3">Opening hours aren&apos;t listed yet. Check with the venue before you go.</p>
+              {v.hours ? (
+                <>
+                  <HoursTable hours={v.hours} />
+                  <p className="mb-[22px] text-[12.5px] text-hfi-t3">
+                    Hours from Google Maps, updated monthly. Times can change, so check with the venue before a special trip.
+                  </p>
+                </>
+              ) : (
+                <p className="mb-[22px] mt-[14px] text-[13px] text-hfi-t3">Opening hours aren&apos;t listed yet. Check with the venue before you go.</p>
+              )}
               <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
                 <PinIcon className="h-[13px] w-[13px]" />
                 Get directions
