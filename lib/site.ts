@@ -41,6 +41,12 @@ export const urls = {
 export const GTM_ID: string | null = "GTM-5J25WWLT";
 export const LIVE_HOSTS = ["thehalalfoodindex.co.uk", "www.thehalalfoodindex.co.uk"];
 
+/**
+ * The Halal Food Index's own social profiles (Instagram, TikTok and so on).
+ * Used as `sameAs` in the Organization schema. Add each one once it exists.
+ */
+export const SOCIAL_PROFILES: string[] = [];
+
 /** Shown on the Privacy page. Null until the owner chooses a public address. */
 export const CONTACT_EMAIL: string | null = null;
 

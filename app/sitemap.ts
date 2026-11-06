@@ -17,12 +17,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: absolute(urls.flagship()), lastModified, changeFrequency: "daily", priority: 1 },
-    { url: absolute(urls.about()), changeFrequency: "yearly" as const, priority: 0.3 },
+    { url: absolute(urls.about()), lastModified: new Date("2026-11-06"), changeFrequency: "yearly" as const, priority: 0.3 },
     { url: absolute(urls.privacy()), changeFrequency: "yearly" as const, priority: 0.1 },
     ...categories.map((path) => ({ url: absolute(path), lastModified, changeFrequency: "weekly" as const, priority: 0.8 })),
     ...all.map((v) => ({
       url: absolute(urls.venue(v.slug)),
-      lastModified: v.publishedAt ? new Date(v.publishedAt) : lastModified,
+      lastModified: new Date(v.updatedAt ?? v.publishedAt ?? lastModified),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),

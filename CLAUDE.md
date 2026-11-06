@@ -38,6 +38,8 @@ Stack: Next.js 14 App Router, TypeScript, Tailwind, Supabase (Postgres 17 + Post
 - **Certification is not part of the product** (decision 3 Nov 2026, see
   `docs/decisions-update-no-certification.md`). Ignore the certification and "certificate seen"
   parts of the venue and chain mockups.
+- **IndexNow:** `indexnow_ping()` (pg_cron `indexnow-daily`, 04:41) sends pages changed in the last
+  48 hours to Bing and friends. The key file is `public/9fd61dfc8540fbe191bdddee1b7905c8.txt`; keep both in step.
 - Old pre-v1 tables live in the `legacy` schema, locked from the API. Leave them alone.
 
 ## Source of truth
@@ -50,6 +52,7 @@ Stack: Next.js 14 App Router, TypeScript, Tailwind, Supabase (Postgres 17 + Post
 | Database schema | `supabase/migrations/` (applied, in order) |
 | DB types | `types/supabase.ts` (generated, do not hand-edit) |
 | Photo pipeline (separate, Apps Script) | `docs/photo-pipeline-phase1-brief.md` |
+| Write-up and copy style (no AI-sounding text) | `docs/writing-style.md`, checked by `scripts/check-writeups.mjs` |
 
 Reference pages in `design/`:
 - `homepage-v10.html`
@@ -93,6 +96,8 @@ Do not redesign. If something in a mockup conflicts with a decisions doc, the de
 - **Fonts:** Bricolage Grotesque (display) + Instrument Sans (body). No other families.
 - **Structured data must match visible text.** No FAQPage schema (no longer earns rich
   results). ItemList entries carry `position` + `url` only.
+  Shared Organization/WebSite nodes live in `lib/schema.ts` (same `@id` on every page).
+  Name only The Halal Food Index: no founder or personal names, no aggregateRating from Google.
 - **Filtered/faceted URLs are not indexable.** Canonical them to the clean base URL. Only
   deliberately built category pages get their own indexed URL.
 - A category page never shows a filter for the facet that defines it (locked-facet rule).

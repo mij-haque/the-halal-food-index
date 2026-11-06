@@ -32,6 +32,8 @@ export type ListingVenue = {
   lat: number | null;
   lng: number | null;
   publishedAt: string | null;
+  /** Last change to the venue row (for sitemap lastmod). */
+  updatedAt: string | null;
 };
 
 export type Facet = { slug: string; name: string; count: number };
@@ -47,6 +49,7 @@ type Row = {
   serves_alcohol: boolean | null;
   location: unknown;
   published_at: string | null;
+  updated_at: string | null;
   area: { slug: string; name: string } | null;
   venue_cuisines: Array<{ is_primary: boolean | null; cuisine: Cuisine | null }>;
 };
@@ -57,7 +60,7 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
     supabaseRead()
       .from("venues")
       .select(
-        "slug, name, venue_type, halal_status, halal_scope, serves_alcohol, location, published_at, area:areas(slug, name), venue_cuisines(is_primary, cuisine:cuisines(id, slug, name, colour_hex))",
+        "slug, name, venue_type, halal_status, halal_scope, serves_alcohol, location, published_at, updated_at, area:areas(slug, name), venue_cuisines(is_primary, cuisine:cuisines(id, slug, name, colour_hex))",
       )
       .eq("status", "published")
       .order("name"),
@@ -86,6 +89,7 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
       lat: point?.lat ?? null,
       lng: point?.lng ?? null,
       publishedAt: r.published_at,
+      updatedAt: r.updated_at,
     };
   });
 });

@@ -98,6 +98,7 @@ export default async function SlugPage({ params }: Props) {
         venues={r.venues}
         allVenues={r.all}
         locked="area"
+        placeName={r.area.slug === "city-centre" ? "Manchester city centre" : r.area.name}
       />
     );
   }
