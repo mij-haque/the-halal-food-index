@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { venueArt, zellijSvg, type ZellijKind } from "@/lib/art";
 import { SITE_NAME, SITE_URL, absolute, shortCount, urls } from "@/lib/site";
-import { openingHoursSpec } from "@/lib/hours";
+import { openingHoursSpec, weekSummary } from "@/lib/hours";
 import {
   directionsHref,
-  fullAddress,
   isPartial,
   listedMonth,
   mapsHref,
+  splitAddress,
   placePhrase,
   quotableAnswer,
   safeWebsite,
@@ -20,20 +20,19 @@ import {
 } from "@/lib/venues";
 import { VenueSubnav, type SubnavLink } from "@/components/venue/venue-subnav";
 import { ReportChange } from "@/components/venue/report-change";
-import { HoursTable, LiveStatus } from "@/components/venue/venue-hours";
+import { LiveStatus, LiveStatusLine } from "@/components/venue/venue-hours";
 import { ShareButton } from "@/components/venue/share-button";
-import { nearestStops, MAX_WALK_MINS, type NearStop } from "@/lib/transit";
+import { nearestStops, type NearStop } from "@/lib/transit";
 import {
-  AlertIcon,
   CheckIcon,
+  ClockIcon,
   DirectionsIcon,
   GlassIcon,
   GlobeIcon,
+  NoAlcoholIcon,
   PhoneIcon,
   PhotoIcon,
   PinIcon,
-  TrainIcon,
-  TramIcon,
 } from "@/components/site/icons";
 
 /*
@@ -215,23 +214,14 @@ function SimilarTile({ t }: { t: VenueTile }) {
   );
 }
 
-const STOP_LABEL: Record<NearStop["kind"], string> = { tram: "Metrolink tram stop", rail: "Train station" };
-
-function StopRow({ stop }: { stop: NearStop }) {
-  const Icon = stop.kind === "tram" ? TramIcon : TrainIcon;
-  return (
-    <li className="flex items-center gap-3 border-b border-hfi-divider py-3 last:border-b-0">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-hfi-pill text-hfi-ink">
-        <Icon className="h-[17px] w-[17px]" />
-      </span>
-      <span className="min-w-0 flex-1 leading-[1.3]">
-        <b className="block truncate text-[14px] font-semibold text-hfi-ink">{stop.name}</b>
-        <span className="block text-[12.5px] text-hfi-t3">{STOP_LABEL[stop.kind]}</span>
-      </span>
-      <span className="whitespace-nowrap text-[13px] font-semibold text-hfi-t2">{stop.walkMins} min walk</span>
-    </li>
-  );
+/** "1 min walk from Exchange Square tram stop", "4 min walk from Manchester Victoria station". */
+function stopLine(s: NearStop): string {
+  const place = s.kind === "tram" ? `${s.name} tram stop` : /station$/i.test(s.name) ? s.name : `${s.name} station`;
+  return `${s.walkMins} min walk from ${place}`;
 }
+
+const darkBtn =
+  "inline-flex shrink-0 items-center justify-center gap-[7px] rounded-full border border-[#3A3A38] px-5 py-[13px] text-sm font-bold text-white transition-colors hover:border-white active:scale-[.97] motion-reduce:active:scale-100";
 
 /* ── view ── */
 
@@ -241,11 +231,13 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
   const website = safeWebsite(v.website);
   const isInstagram = website ? /(^|\.)instagram\.com$/i.test(new URL(website).hostname) : false;
   const summary = summaryText(v);
-  const address = fullAddress(v);
   const directions = directionsHref(v);
   const partial = isPartial(v);
   const stops = nearestStops(v.point);
-  const nearby = [stops.tram, stops.rail].filter((s): s is NearStop => s !== null).sort((a, b) => a.walkMins - b.walkMins);
+  const nearest = [stops.tram, stops.rail].filter((s): s is NearStop => s !== null).sort((a, b) => a.walkMins - b.walkMins)[0] ?? null;
+  const week = weekSummary(v.hours);
+  const { street, town } = splitAddress(v.address_line);
+  const addrRest = [town, v.postcode].filter(Boolean).join(", ");
 
   const metaBits = [...v.cuisines.slice(0, 2).map((c) => c.name), ...(v.cuisines.length ? [] : [typeLabel(v.venue_type)])];
   if (v.area) metaBits.push(v.area.name);
@@ -401,16 +393,18 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
 
       <VenueSubnav links={subnav} />
 
-      {/* ── overview + halal info ── */}
+      {/* ── about + know before you go (option E3, 6 Nov 2026) ── */}
       <section className={`${band} scroll-mt-[122px]`} id="overview">
-        <div className="mx-auto max-w-[1180px]" data-reveal>
-          <div className="grid grid-cols-2 max-[1040px]:grid-cols-1 max-[1040px]:gap-9">
-            <div className="border-r border-hfi-divider pr-12 max-[1040px]:border-r-0 max-[1040px]:pr-0">
-              <h2 className="hfi-display-md mb-[14px]">About {v.name}</h2>
+        <div className="mx-auto flex max-w-[1180px] flex-col gap-10 max-[640px]:gap-8" data-reveal>
+          <div className="grid grid-cols-[220px_minmax(0,1fr)] items-start gap-10 max-[1040px]:grid-cols-1 max-[1040px]:gap-4">
+            <h2 className="hfi-display-md">About {v.name}</h2>
+            <div>
               {summary ? (
-                <p className={secS}>{summary}</p>
+                <p className="m-0 max-w-[820px] font-display text-[22px] font-bold leading-[1.45] tracking-[-.4px] text-[#1A1A19] [font-variation-settings:'opsz'_28] max-[640px]:text-[18px]">
+                  {summary}
+                </p>
               ) : (
-                <p className={secS}>
+                <p className="m-0 max-w-[560px] text-[15px] text-hfi-t2">
                   We haven&apos;t written about {v.name} yet. Been recently?{" "}
                   <a href="#report" className="font-semibold text-hfi-link">
                     Tell us what&apos;s good
@@ -419,133 +413,138 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
                 </p>
               )}
               {v.tags.length > 0 && (
-                <div className="mb-4 flex flex-wrap gap-2.5">
+                <div className="mt-4 flex flex-wrap gap-2.5">
                   {v.tags.map((t) => (
                     <Chip key={t} tone="n" icon={<CheckIcon className="h-[13px] w-[13px]" />} label={t} />
                   ))}
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="scroll-mt-[122px] pl-12 max-[1040px]:pl-0" id="halal">
-              <div className="mb-[5px] flex items-baseline justify-between gap-4">
-                <h2 className="hfi-display-md">Halal info</h2>
+          <div className="grid grid-cols-[220px_minmax(0,1fr)] items-start gap-10 max-[1040px]:grid-cols-1 max-[1040px]:gap-3">
+            <h2 className="mt-1 text-[12px] font-bold uppercase tracking-[.1em] text-hfi-t2">Know before you go</h2>
+            <div className="grid grid-cols-3 border-t border-hfi-border max-[1040px]:grid-cols-1">
+              {/* hours */}
+              <div className="flex flex-col gap-2 pb-1 pr-6 pt-5 max-[1040px]:pr-0">
+                <h3 className="sr-only">Opening hours</h3>
+                <ClockIcon className="h-5 w-5" />
+                {week ? (
+                  <dl className="m-0 flex flex-col gap-0.5 text-[15px]">
+                    {week.map((w) => (
+                      <div key={w.days} className="flex flex-wrap gap-x-1.5">
+                        <dt className="font-bold">{w.days},</dt>
+                        <dd className="m-0 font-bold">{w.hours}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <b className="text-[15px]">Hours not listed yet</b>
+                )}
+                {week ? (
+                  <LiveStatus hours={v.hours} />
+                ) : (
+                  <span className="text-[13px] text-hfi-t2">Check with the venue before you go.</span>
+                )}
               </div>
-              <p className={secS}>{sourceLine}</p>
 
-              {partial && v.halal_scope && (
-                <p className="mb-[18px] rounded-xl bg-hfi-amber-bg px-4 py-[14px] text-base font-medium leading-normal text-[#5C3D02]">
-                  <b className="font-bold text-[#3D2900]">Partly halal.</b> {v.halal_scope}
-                </p>
-              )}
-
-              {(v.serves_alcohol !== null || v.shared_kitchen !== null) && (
-                <div className="mb-4 flex flex-wrap gap-2.5">
-                  {v.serves_alcohol === false && (
-                    <Chip tone="g" icon={<CheckIcon className="h-[13px] w-[13px]" />} label="No alcohol" note="Not served" />
-                  )}
-                  {v.serves_alcohol === true && (
-                    <Chip tone="r" icon={<GlassIcon className="h-[13px] w-[13px]" />} label="Serves alcohol" note="On the drinks menu" />
-                  )}
-                  {v.shared_kitchen === false && (
-                    <Chip tone="g" icon={<CheckIcon className="h-[13px] w-[13px]" />} label="Nothing shared" note="Single kitchen" />
-                  )}
-                  {v.shared_kitchen === true && (
-                    <Chip tone="r" icon={<AlertIcon className="h-[13px] w-[13px]" />} label="Shared kitchen" note="Ask staff before ordering" />
-                  )}
-                </div>
-              )}
-
-              <p className="text-[13px] text-hfi-t2">
-                Found something different when you visited?{" "}
-                <a href="#report" className="font-semibold text-hfi-link">
-                  Let us know
-                </a>
-                .
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── location ── */}
-      <section className={`${sectionPad} scroll-mt-[122px]`} id="location">
-        <div className="mx-auto max-w-[1180px]" data-reveal>
-          <div className="mb-[5px] flex items-baseline justify-between gap-4">
-            <h2 className="hfi-display-md">Find {v.name}</h2>
-          </div>
-          <p className={secS}>
-            {v.name} is {placePhrase(v.area)}.
-          </p>
-
-          <div className="grid grid-cols-2 items-start gap-9 max-[1040px]:grid-cols-1 max-[1040px]:gap-7">
-            <div>
-              <p className="mb-1 text-sm text-hfi-t2">
-                <b className="text-hfi-ink">{v.name}</b>
-              </p>
-              {address && (
-                <p className="mb-1 text-sm text-hfi-t2">
+              {/* address */}
+              <div
+                className="flex scroll-mt-[122px] flex-col gap-2 border-l border-hfi-divider px-6 pb-1 pt-5 max-[1040px]:border-l-0 max-[1040px]:border-t max-[1040px]:px-0"
+                id="location"
+              >
+                <h3 className="sr-only">Address</h3>
+                <PinIcon className="h-5 w-5" />
+                {street || addrRest ? (
                   <a
                     href={mapsHref(v)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-start gap-1.5 text-hfi-ink underline decoration-hfi-border underline-offset-[3px] transition-colors hover:decoration-hfi-ink"
+                    className="group flex flex-col gap-0.5 text-hfi-ink no-underline"
                   >
-                    <PinIcon className="mt-[3px] h-[13px] w-[13px] shrink-0 text-hfi-t3" />
-                    <span>
-                      {address}
-                      <span className="sr-only"> (opens Google Maps)</span>
-                    </span>
+                    {street && <b className="text-[15px]">{street}</b>}
+                    {addrRest && (
+                      <span className="text-[13px] underline decoration-hfi-border underline-offset-[3px] transition-colors group-hover:decoration-hfi-ink">
+                        {addrRest}
+                      </span>
+                    )}
+                    <span className="sr-only"> (opens Google Maps)</span>
                   </a>
-                </p>
-              )}
-              {v.phone && (
-                <p className="mb-1 text-sm text-hfi-t2">
-                  <a href={`tel:${telHref(v.phone)}`}>{v.phone}</a>
-                </p>
-              )}
-              {v.hours ? (
-                <>
-                  <HoursTable hours={v.hours} />
-                  <p className="text-[12.5px] text-hfi-t3">
-                    Hours from Google Maps, updated monthly. Times can change, so check with the venue before a special trip.
-                  </p>
-                </>
-              ) : (
-                <p className="mt-[14px] text-[13px] text-hfi-t3">Opening hours aren&apos;t listed yet. Check with the venue before you go.</p>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-hfi-border bg-hfi-surface p-6 shadow-[0_4px_18px_rgba(15,15,15,.05)] max-[640px]:p-5">
-              <h3 className="mb-1 text-[15px] font-bold tracking-[-.1px] text-hfi-ink">Getting there</h3>
-              {v.point && nearby.length > 0 ? (
-                <ul className="mb-4">
-                  {nearby.map((s) => (
-                    <StopRow key={s.kind} stop={s} />
-                  ))}
-                </ul>
-              ) : (
-                <p className="mb-4 mt-2 text-[13.5px] text-hfi-t2">
-                  {v.point
-                    ? `No tram stop or train station within a ${MAX_WALK_MINS} minute walk. Google Maps can show bus routes.`
-                    : "Google Maps can plan your route by bus, tram or train."}
-                </p>
-              )}
-              <div className="flex flex-wrap gap-2 max-[640px]:grid max-[640px]:grid-cols-2">
-                <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
-                  <DirectionsIcon className="h-[13px] w-[13px]" />
-                  Directions
-                </a>
-                <a className={ghostBtn} href={directionsHref(v, "transit")} target="_blank" rel="noopener noreferrer">
-                  <TramIcon className="h-[14px] w-[14px]" />
-                  Public transport
-                </a>
+                ) : (
+                  <b className="text-[15px]">{v.area?.name ?? "Greater Manchester"}</b>
+                )}
+                {nearest && <span className="text-[12.5px] text-hfi-t2">{stopLine(nearest)}</span>}
+                {v.phone && (
+                  <a href={`tel:${telHref(v.phone)}`} className="text-[13px] text-hfi-t2 no-underline hover:text-hfi-ink">
+                    {v.phone}
+                  </a>
+                )}
               </div>
-              {nearby.length > 0 && (
-                <p className="mt-3 text-[12px] text-hfi-t3">Walking times are rough estimates from the nearest entrance.</p>
-              )}
+
+              {/* halal info */}
+              <div
+                className="flex scroll-mt-[122px] flex-col gap-2 border-l border-hfi-divider pb-1 pl-6 pt-5 max-[1040px]:border-l-0 max-[1040px]:border-t max-[1040px]:pl-0"
+                id="halal"
+              >
+                <h3 className="sr-only">Halal info</h3>
+                {v.serves_alcohol === true ? <GlassIcon className="h-5 w-5" /> : <NoAlcoholIcon className="h-5 w-5" />}
+                <b className="text-[15px]">
+                  {v.serves_alcohol === false ? "No alcohol" : v.serves_alcohol === true ? "Serves alcohol" : "Alcohol not confirmed"}
+                </b>
+                {partial && v.halal_scope && (
+                  <p className="m-0 rounded-lg bg-hfi-amber-bg px-3 py-2 text-[13px] font-medium text-[#5C3D02]">
+                    <b className="font-bold text-[#3D2900]">Partly halal.</b> {v.halal_scope}
+                  </p>
+                )}
+                {v.shared_kitchen !== null && (
+                  <span className="text-[13px] text-hfi-t2">
+                    {v.shared_kitchen ? "Shared kitchen, so ask staff before ordering." : "Nothing shared in the kitchen."}
+                  </span>
+                )}
+                <span className="text-[13px] text-hfi-t2">
+                  {sourceLine}{" "}
+                  <a href="#report" className="font-semibold text-hfi-link">
+                    Spotted a change?
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
+
+          <div className="flex items-center justify-between gap-7 rounded-[22px] bg-hfi-ink px-[34px] py-[30px] text-white max-[1040px]:flex-col max-[1040px]:items-stretch max-[640px]:px-5 max-[640px]:py-6">
+            <div className="flex flex-col gap-1">
+              <p className="m-0 font-display text-[24px] font-extrabold tracking-[-.8px] text-white max-[640px]:text-[20px]">
+                Heading to {v.name}?
+              </p>
+              <p className="m-0 text-sm text-[#BDBDB8]">
+                <LiveStatusLine hours={v.hours} fallback={`${v.name} is ${placePhrase(v.area)}.`} />
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2.5 max-[640px]:grid max-[640px]:grid-cols-2">
+              <a className={`${ctaBtn} px-[22px] py-[13px] text-sm`} href={directions} target="_blank" rel="noopener noreferrer">
+                <DirectionsIcon className="h-[13px] w-[13px]" />
+                Get directions
+              </a>
+              {v.phone && (
+                <a className={darkBtn} href={`tel:${telHref(v.phone)}`} aria-label={`Call ${v.name}`}>
+                  <PhoneIcon className="h-[14px] w-[14px]" />
+                  Call
+                </a>
+              )}
+              {website && (
+                <a className={darkBtn} href={website} target="_blank" rel="noopener noreferrer">
+                  <GlobeIcon className="h-[14px] w-[14px]" />
+                  {isInstagram ? "Instagram" : "Website"}
+                </a>
+              )}
+              <ShareButton title={v.name} url={absolute(urls.venue(v.slug))} className={darkBtn} />
+            </div>
+          </div>
+          <p className="-mt-6 text-[12px] text-hfi-t2">
+            {v.hours ? "Hours from Google Maps, updated monthly. " : ""}
+            {nearest ? "Walk time is an estimate. " : ""}
+            {v.rating != null ? `★ ${v.rating.toFixed(1)} from ${v.reviewCount != null ? `${shortCount(v.reviewCount)} ` : ""}Google reviews.` : ""}
+          </p>
         </div>
       </section>
 

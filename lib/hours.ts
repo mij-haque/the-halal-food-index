@@ -110,6 +110,41 @@ export function dayText(ranges: number[][] | undefined): string {
   return ranges.map(([s, e]) => `${hhmm(s)} \u2013 ${hhmm(e)}`).join(", ");
 }
 
+/** "9am to 9pm", "12pm to 11:30pm and 5pm to midnight", "Open 24 hours", "Closed". */
+function rangesText(ranges: number[][]): string {
+  if (ranges.length === 0) return "Closed";
+  if (ranges.length === 1 && ranges[0][0] === 0 && ranges[0][1] >= 1440) return "Open 24 hours";
+  return ranges.map(([s, e]) => `${clock(s)} to ${clock(e)}`).join(" and ");
+}
+
+/**
+ * The week in as few lines as possible: days next to each other with the same
+ * hours are grouped. [{ days: "Every day", hours: "9am to 9pm" }] or
+ * [{ days: "Mon to Thu", ... }, { days: "Fri to Sun", ... }]. Days we don't
+ * know are left out. Null when no day is known.
+ */
+export function weekSummary(hours: WeekHours | null | undefined): Array<{ days: string; hours: string }> | null {
+  if (!hours) return null;
+  const groups: Array<{ from: DayKey; to: DayKey; n: number; key: string; text: string }> = [];
+  for (const d of DAYS) {
+    const r = hours[d];
+    if (r === undefined) continue;
+    const key = JSON.stringify(r);
+    const last = groups[groups.length - 1];
+    if (last && last.key === key && DAYS.indexOf(last.to) === DAYS.indexOf(d) - 1) {
+      last.to = d;
+      last.n++;
+    } else {
+      groups.push({ from: d, to: d, n: 1, key, text: rangesText(r) });
+    }
+  }
+  if (!groups.length) return null;
+  return groups.map((g) => ({
+    days: g.n === 7 ? "Every day" : g.n === 1 ? SHORT[g.from] : `${SHORT[g.from]} to ${SHORT[g.to]}`,
+    hours: g.text,
+  }));
+}
+
 /**
  * schema.org openingHoursSpecification, only when all seven days are known
  * (so it never claims more than the table shows). Days with the same hours
