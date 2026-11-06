@@ -43,6 +43,7 @@ const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 function checkOne(item) {
   const issues = [];
+  const warnings = [];
   const t = item.text ?? "";
   const n = words(t).length;
   if (n < 30 || n > 110) issues.push(`length ${n} words (aim for 30 to 110)`);
@@ -52,13 +53,15 @@ function checkOne(item) {
   }
   for (const [re, label] of BANNED_PATTERNS) if (re.test(t)) issues.push(`banned pattern: ${label}`);
 
-  const triples = t.match(/\b[\w'-]+, [\w' -]+,? and [\w'-]+\b/g) ?? [];
-  if (triples.length > 1) issues.push(`${triples.length} lists of three (keep to one at most)`);
+  // Rough: "A, B and C" with short items. A warning only, because commas between
+  // clauses look the same to a regex. Read the flagged sentences yourself.
+  const triples = t.match(/\b[\w'-]+(?: [\w'-]+)?, [\w'-]+(?: [\w'-]+)?,? and [\w'-]+\b/g) ?? [];
+  if (triples.length > 1) warnings.push(`maybe ${triples.length} lists of three: ${triples.map((x) => `"${x}"`).join("; ")}`);
 
   const lens = sentences(t).map((s) => words(s).length);
   if (lens.length >= 3 && stdev(lens) < 3) issues.push(`flat rhythm: sentence lengths ${lens.join(", ")} (mix short and long)`);
 
-  return { slug: item.slug, words: n, issues };
+  return { slug: item.slug, words: n, issues, warnings };
 }
 
 function checkBatch(items) {
@@ -90,6 +93,7 @@ for (const r of items.map(checkOne)) {
   if (r.issues.length) flagged++;
   console.log(`${r.issues.length ? "FIX" : "ok "}  ${r.slug} (${r.words} words)`);
   for (const i of r.issues) console.log(`       - ${i}`);
+  for (const w of r.warnings) console.log(`       ? ${w}`);
 }
 const batch = checkBatch(items);
 if (batch.length) {
