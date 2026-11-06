@@ -330,7 +330,8 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
             <LiveStatus hours={v.hours} />
           </div>
 
-          <div className="mb-[26px] flex flex-wrap gap-2 max-[640px]:grid max-[640px]:grid-cols-2">
+          {/* phones: one row of equal tiles, icon over label (BestDubai / Maps style) */}
+          <div className="mb-[26px] flex flex-wrap gap-2 max-[640px]:grid max-[640px]:auto-cols-fr max-[640px]:grid-flow-col max-[640px]:[&>*]:flex-col max-[640px]:[&>*]:gap-1 max-[640px]:[&>*]:rounded-[14px] max-[640px]:[&>*]:px-2 max-[640px]:[&>*]:py-[11px] max-[640px]:[&>*]:text-[12px]">
             <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
               <DirectionsIcon className="h-[13px] w-[13px]" />
               Directions
