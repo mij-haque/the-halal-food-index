@@ -190,7 +190,7 @@ function Chip({ tone, icon, label, note }: { tone: ChipTone; icon: React.ReactNo
   );
 }
 
-function SimilarTile({ t }: { t: VenueTile }) {
+export function SimilarTile({ t }: { t: VenueTile }) {
   const art = venueArt(t.slug, t.cuisine);
   const col = art.col;
   const sub = [t.cuisine?.name, t.areaName].filter(Boolean).join(" · ");
