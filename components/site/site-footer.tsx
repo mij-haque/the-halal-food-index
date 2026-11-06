@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LogoLockup } from "@/components/site/seal";
+import { CookieSettingsButton } from "@/components/site/analytics";
 import { footerAreas, footerCuisines, urls } from "@/lib/site";
 
 const flink = "block py-1.5 text-[13px] text-hfi-t2 hover:text-hfi-ink";
@@ -58,6 +59,7 @@ export function SiteFooter({ currentAreaSlug }: { currentAreaSlug?: string }) {
           <span>&copy; {new Date().getFullYear()} The Halal Food Index</span>
           <nav className="flex gap-5" aria-label="Legal">
             <Link href={urls.privacy()}>Privacy</Link>
+            <CookieSettingsButton />
           </nav>
         </div>
       </div>
