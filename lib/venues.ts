@@ -1,6 +1,9 @@
 import { cache } from "react";
 import { supabaseRead } from "@/lib/supabase/server";
 import { noEmDash } from "@/lib/site";
+import type { WeekHours } from "@/lib/hours";
+import { NO_FACTS, getPlaceFacts } from "@/lib/place-facts";
+import { parsePoint, type LatLng } from "@/lib/geo";
 
 /* ── types ── */
 
@@ -29,6 +32,12 @@ export type Venue = {
   updated_at: string | null;
   area: Area | null;
   cuisines: Cuisine[]; // primary first
+  /** Map point, when we hold one. */
+  point: LatLng | null;
+  /** Google Maps facts (maps-refresh job). Null when we don't hold them. */
+  rating: number | null;
+  reviewCount: number | null;
+  hours: WeekHours | null;
 };
 
 export type VenueTile = {
@@ -43,7 +52,7 @@ export type VenueTile = {
 const VENUE_SELECT = `
   id, slug, name, venue_type, address_line, postcode, phone, website, price_band,
   halal_status, halal_scope, serves_alcohol, shared_kitchen, verification_tier, tags,
-  summary, google_place_id, published_at, updated_at,
+  summary, google_place_id, published_at, updated_at, location,
   area:areas(id, slug, name),
   venue_cuisines(is_primary, cuisine:cuisines(id, slug, name, colour_hex))
 `;
@@ -68,17 +77,24 @@ const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 /** One published venue by slug, or null. Deduplicated per request. */
 export const getVenue = cache(async (slug: string): Promise<Venue | null> => {
   if (!SLUG_RE.test(slug) || slug.length > 120) return null;
-  const { data, error } = await supabaseRead()
-    .from("venues")
-    .select(VENUE_SELECT)
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  const [{ data, error }, facts] = await Promise.all([
+    supabaseRead().from("venues").select(VENUE_SELECT).eq("slug", slug).eq("status", "published").maybeSingle(),
+    getPlaceFacts(),
+  ]);
   if (error) throw new Error(`Venue query failed: ${error.message}`);
   if (!data) return null;
-  const row = data as unknown as Omit<Venue, "cuisines"> & { venue_cuisines: CuisineLink[] };
-  const { venue_cuisines, ...rest } = row;
-  return { ...rest, tags: rest.tags ?? [], cuisines: orderedCuisines(venue_cuisines) };
+  const row = data as unknown as Omit<Venue, "cuisines" | "point" | "rating" | "reviewCount" | "hours"> & {
+    venue_cuisines: CuisineLink[];
+    location: unknown;
+  };
+  const { venue_cuisines, location, ...rest } = row;
+  return {
+    ...rest,
+    tags: rest.tags ?? [],
+    cuisines: orderedCuisines(venue_cuisines),
+    point: parsePoint(location),
+    ...(facts.get(rest.slug) ?? NO_FACTS),
+  };
 });
 
 type TileRow = { id: string; slug: string; name: string; area: { name: string } | null; venue_cuisines: CuisineLink[] };
@@ -213,10 +229,29 @@ export function fullAddress(v: Venue): string {
   return [v.address_line, v.postcode].filter(Boolean).join(", ");
 }
 
-export function directionsHref(v: Venue): string {
+/** Google Maps directions to the venue. `mode` picks the travel mode (Google's default otherwise). */
+export function directionsHref(v: Venue, mode?: "transit" | "walking" | "driving"): string {
   const dest = encodeURIComponent([v.name, v.address_line, v.postcode].filter(Boolean).join(", "));
   const pid = v.google_place_id ? `&destination_place_id=${encodeURIComponent(v.google_place_id)}` : "";
-  return `https://www.google.com/maps/dir/?api=1&destination=${dest}${pid}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${dest}${pid}${mode ? `&travelmode=${mode}` : ""}`;
+}
+
+/** "104 Derby St, Bolton" -> street "104 Derby St", town "Bolton". */
+export function splitAddress(line: string | null): { street: string | null; town: string | null } {
+  if (!line) return { street: null, town: null };
+  const parts = line.split(",").map((p) => p.trim()).filter(Boolean);
+  const last = parts[parts.length - 1];
+  if (parts.length > 1 && last && /^[A-Za-z][A-Za-z\s'-]*$/.test(last)) {
+    return { street: parts.slice(0, -1).join(", "), town: last };
+  }
+  return { street: line, town: null };
+}
+
+/** The venue on Google Maps (its own place page when we hold the place ID). */
+export function mapsHref(v: Venue): string {
+  const q = encodeURIComponent([v.name, v.address_line, v.postcode].filter(Boolean).join(", "));
+  const pid = v.google_place_id ? `&query_place_id=${encodeURIComponent(v.google_place_id)}` : "";
+  return `https://www.google.com/maps/search/?api=1&query=${q}${pid}`;
 }
 
 export function listedMonth(iso: string | null): { label: string; iso: string } | null {

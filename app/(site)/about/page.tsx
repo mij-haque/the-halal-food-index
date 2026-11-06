@@ -16,7 +16,7 @@ export default function AboutPage() {
       crumb={TITLE}
       heading="About our listings"
       lede="The Halal Food Index is a guide to halal food in Greater Manchester. Every place listed says it serves halal food."
-      updated="4 November 2026"
+      updated="6 November 2026"
     >
       <TextSection title="How a place gets listed">
         <p>
@@ -48,6 +48,22 @@ export default function AboutPage() {
         <p>
           Opening hours, star ratings and review counts come from Google Maps and are refreshed every month. Times can change, so check with
           the venue before a special trip.
+        </p>
+      </TextSection>
+
+      <TextSection title="Tram stops and train stations">
+        <p>
+          Each venue page names the nearest Metrolink stop and train station, with a rough walking time. Stop locations come from the
+          Department for Transport&apos;s NaPTAN data. Contains public sector information licensed under the{" "}
+          <a
+            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+            className="font-semibold text-hfi-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open Government Licence v3.0
+          </a>
+          .
         </p>
       </TextSection>
 

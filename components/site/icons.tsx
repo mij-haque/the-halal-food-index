@@ -87,3 +87,37 @@ export const AlertIcon = ({ className }: P) => (
     <path d="M12 7.5v5.5M12 16.5v.01" />
   </svg>
 );
+export const ShareIcon = ({ className }: P) => (
+  <svg {...base} strokeWidth={2.2} className={className}>
+    <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+  </svg>
+);
+export const DirectionsIcon = ({ className }: P) => (
+  <svg {...base} strokeWidth={2.2} className={className}>
+    <path d="M3 11 21 3l-8 18-2-8Z" />
+  </svg>
+);
+export const TramIcon = ({ className }: P) => (
+  <svg {...base} strokeWidth={2} className={className}>
+    <path d="M9 2.5h6M12 2.5V6" />
+    <rect x="5" y="6" width="14" height="12.5" rx="3" />
+    <path d="M5 12.5h14M9 15.5h.01M15 15.5h.01M8 18.5l-2 3M16 18.5l2 3" />
+  </svg>
+);
+export const TrainIcon = ({ className }: P) => (
+  <svg {...base} strokeWidth={2} className={className}>
+    <rect x="5" y="3" width="14" height="15" rx="4" />
+    <path d="M5 11h14M12 3v8M9 14.5h.01M15 14.5h.01M8 18l-2 3.5M16 18l2 3.5" />
+  </svg>
+);
+export const ClockIcon = ({ className }: P) => (
+  <svg {...base} strokeWidth={1.8} className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+export const NoAlcoholIcon = ({ className }: P) => (
+  <svg {...base} strokeWidth={1.8} className={className}>
+    <path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3zM12 13v7M9 21h6M4 4l16 16" />
+  </svg>
+);

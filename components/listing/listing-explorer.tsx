@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { venueArt, zellijFill } from "@/lib/art";
-import { openStatus, type OpenStatus } from "@/lib/hours";
+import { openStatus } from "@/lib/hours";
+import { shortCount } from "@/lib/site";
+import { useNow } from "@/lib/use-now";
 import type { Facet, ListingVenue } from "@/lib/listings";
 import { CloseIcon, PinIcon } from "@/components/site/icons";
+import { StatusPill } from "@/components/site/status-pill";
 
 /*
  * Listing filters, sort and cards (design/listing-manchester.html, card option
@@ -46,17 +49,6 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const a =
     Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-/** The time now, ticking each minute. Null on the server and first render. */
-function useNow(): Date | null {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    setNow(new Date());
-    const id = window.setInterval(() => setNow(new Date()), 60_000);
-    return () => window.clearInterval(id);
-  }, []);
-  return now;
 }
 
 const roundBtn =
@@ -481,28 +473,6 @@ function FilterGroups(p: GroupsProps) {
 }
 
 /* ── cards ── */
-
-const TONE: Record<OpenStatus["tone"], { pill: string; dot: string }> = {
-  open: { pill: "bg-hfi-green-bg text-hfi-ink", dot: "bg-hfi-green" },
-  soon: { pill: "bg-hfi-amber-bg text-[#5C3D02]", dot: "bg-hfi-amber" },
-  closed: { pill: "bg-hfi-pill text-hfi-t2", dot: "bg-hfi-t3" },
-};
-
-function StatusPill({ status }: { status: OpenStatus }) {
-  const t = TONE[status.tone];
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full py-[3px] pl-2 pr-2.5 text-[11.5px] font-semibold ${t.pill}`}>
-      <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${t.dot}`} aria-hidden="true" />
-      {status.label}
-    </span>
-  );
-}
-
-function shortCount(n: number): string {
-  if (n < 1000) return String(n);
-  const k = Math.round(n / 100) / 10;
-  return `${k % 1 === 0 ? k.toFixed(0) : k}k`;
-}
 
 function Rating({ v }: { v: ListingVenue }) {
   if (v.rating == null) return null;
