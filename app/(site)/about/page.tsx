@@ -17,6 +17,7 @@ export default function AboutPage() {
       heading="About our listings"
       lede="The Halal Food Index is a guide to halal food in Greater Manchester. Every place listed says it serves halal food."
       updated="6 November 2026"
+      pageType="AboutPage"
     >
       <TextSection title="How a place gets listed">
         <p>

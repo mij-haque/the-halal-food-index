@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { SITE_NAME, SITE_URL, absolute, noEmDash, urls } from "@/lib/site";
+import { ORG_ID, WEBSITE_ID, breadcrumbNode, jsonLdHtml, organizationNode, websiteNode } from "@/lib/schema";
 
 /*
  * Plain text pages (About, Privacy). No mockup exists for these, so they reuse
@@ -21,25 +22,41 @@ export function textPageMetadata(p: { path: string; title: string; description: 
   };
 }
 
-export function TextPage(p: { path: string; crumb: string; heading: string; lede: string; updated?: string; children: ReactNode }) {
+export function TextPage(p: {
+  path: string;
+  crumb: string;
+  heading: string;
+  lede: string;
+  /** Shown as "Last updated 6 November 2026". */
+  updated?: string;
+  /** schema.org page type: AboutPage for About, WebPage otherwise. */
+  pageType?: "AboutPage" | "WebPage";
+  children: ReactNode;
+}) {
   const url = absolute(p.path);
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${url}#breadcrumb`,
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
-          { "@type": "ListItem", position: 2, name: p.crumb, item: url },
-        ],
-      },
-      { "@type": "WebPage", "@id": `${url}#webpage`, url, name: p.heading, isPartOf: { "@id": `${SITE_URL}/#website` } },
-    ],
-  };
+  const graph = [
+    organizationNode(),
+    websiteNode(),
+    breadcrumbNode(url, [
+      { name: "Home", item: `${SITE_URL}/` },
+      { name: p.crumb, item: url },
+    ]),
+    {
+      "@type": p.pageType ?? "WebPage",
+      "@id": `${url}#webpage`,
+      url,
+      name: p.heading,
+      description: noEmDash(p.lede),
+      isPartOf: { "@id": WEBSITE_ID },
+      publisher: { "@id": ORG_ID },
+      breadcrumb: { "@id": `${url}#breadcrumb` },
+      ...(p.pageType === "AboutPage" ? { about: { "@id": ORG_ID } } : {}),
+      inLanguage: "en-GB",
+    },
+  ];
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(graph) }} />
       <section className="border-b border-hfi-hair bg-hfi-band px-7 pb-[30px] pt-[34px] max-[640px]:px-5 max-[640px]:pb-6 max-[640px]:pt-[26px]">
         <div className="mx-auto max-w-[1180px]">
           <nav className="mb-4 flex flex-wrap items-center gap-[7px] text-[12.5px] text-hfi-t3" aria-label="Breadcrumb">

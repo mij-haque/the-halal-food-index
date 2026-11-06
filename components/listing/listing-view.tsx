@@ -11,6 +11,7 @@ import {
   type ListingVenue,
 } from "@/lib/listings";
 import { ListingExplorer } from "@/components/listing/listing-explorer";
+import { GREATER_MANCHESTER, ORG_ID, WEBSITE_ID, breadcrumbNode, jsonLdHtml, organizationNode, placeNode, websiteNode } from "@/lib/schema";
 
 /*
  * Listing template (design/listing-manchester.html). The flagship page and
@@ -28,6 +29,8 @@ export type ListingPageProps = {
   venues: ListingVenue[]; // venues on this page
   allVenues: ListingVenue[]; // every published venue, for related links
   locked?: "area" | "cuisine";
+  /** The part of Greater Manchester this page covers, for structured data (area pages). */
+  placeName?: string;
 };
 
 export function listingMetadata(p: { path: string; title: string; description: string; count: number; alwaysIndex?: boolean }): Metadata {
@@ -47,36 +50,34 @@ export function listingMetadata(p: { path: string; title: string; description: s
 function jsonLd(p: ListingPageProps) {
   const url = absolute(p.path);
   const crumbs = [{ name: "Home", item: `${SITE_URL}/` }, ...p.crumbs.map((c) => ({ name: c.name, item: absolute(c.href) }))];
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      { "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: SITE_NAME, url: `${SITE_URL}/` },
-      { "@type": "WebSite", "@id": `${SITE_URL}/#website`, url: `${SITE_URL}/`, name: SITE_NAME, publisher: { "@id": `${SITE_URL}/#organization` } },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${url}#breadcrumb`,
-        itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.item })),
-      },
-      {
-        "@type": "CollectionPage",
-        "@id": `${url}#webpage`,
-        url,
-        name: p.heading,
-        description: p.lede,
-        isPartOf: { "@id": `${SITE_URL}/#website` },
-        breadcrumb: { "@id": `${url}#breadcrumb` },
-        inLanguage: "en-GB",
-      },
-      {
-        // Google's summary-page pattern: position + url only, every item on the page
-        "@type": "ItemList",
-        "@id": `${url}#items`,
-        name: p.heading,
-        numberOfItems: p.venues.length,
-        itemListElement: p.venues.map((v, i) => ({ "@type": "ListItem", position: i + 1, url: absolute(urls.venue(v.slug)) })),
-      },
-    ],
-  };
+  const updated = lastUpdated(p.venues);
+  return [
+    organizationNode(),
+    websiteNode(),
+    breadcrumbNode(url, crumbs),
+    {
+      "@type": "CollectionPage",
+      "@id": `${url}#webpage`,
+      url,
+      name: p.heading,
+      description: p.lede,
+      isPartOf: { "@id": WEBSITE_ID },
+      publisher: { "@id": ORG_ID },
+      breadcrumb: { "@id": `${url}#breadcrumb` },
+      mainEntity: { "@id": `${url}#items` },
+      spatialCoverage: p.placeName ? placeNode(p.placeName) : GREATER_MANCHESTER,
+      ...(updated ? { dateModified: updated.iso } : {}),
+      inLanguage: "en-GB",
+    },
+    {
+      // Google's summary-page pattern: position + url only, every item on the page
+      "@type": "ItemList",
+      "@id": `${url}#items`,
+      name: p.heading,
+      numberOfItems: p.venues.length,
+      itemListElement: p.venues.map((v, i) => ({ "@type": "ListItem", position: i + 1, url: absolute(urls.venue(v.slug)) })),
+    },
+  ];
 }
 
 export function ListingView(p: ListingPageProps) {
@@ -92,7 +93,7 @@ export function ListingView(p: ListingPageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(p)).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd(p)) }} />
       <span
         aria-hidden="true"
         className="pointer-events-none absolute h-0 w-0 overflow-hidden"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { venueArt, zellijSvg, type ZellijKind } from "@/lib/art";
 import { SITE_NAME, SITE_URL, absolute, shortCount, urls } from "@/lib/site";
+import { ORG_ID, WEBSITE_ID, breadcrumbNode, jsonLdHtml, organizationNode, placeNode, websiteNode } from "@/lib/schema";
 import { openingHoursSpec, weekSummary } from "@/lib/hours";
 import {
   directionsHref,
@@ -69,6 +70,8 @@ function metaDescription(v: Venue): string {
   return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
 }
 
+const round6 = (n: number) => Math.round(n * 1e6) / 1e6;
+
 function jsonLd(v: Venue) {
   const url = absolute(urls.venue(v.slug));
   const crumbs = [
@@ -79,68 +82,65 @@ function jsonLd(v: Venue) {
   const placeType = v.venue_type === "cafe" ? "CafeOrCoffeeShop" : v.venue_type === "bakery" ? "Bakery" : "Restaurant";
   const summary = summaryText(v);
   const hoursSpec = openingHoursSpec(v.hours);
+  const website = safeWebsite(v.website);
+  const { street, town } = splitAddress(v.address_line);
 
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${SITE_URL}/#organization`,
-        name: SITE_NAME,
-        url: `${SITE_URL}/`,
-        description: "Greater Manchester's halal food guide, plus the halal status of UK restaurant chains.",
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${SITE_URL}/#website`,
-        url: `${SITE_URL}/`,
-        name: SITE_NAME,
-        publisher: { "@id": `${SITE_URL}/#organization` },
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${url}#breadcrumb`,
-        itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.item })),
-      },
-      {
-        "@type": placeType,
-        "@id": `${url}#restaurant`,
-        name: v.name,
-        url,
-        ...(summary ? { description: summary } : {}),
-        servesCuisine: [...v.cuisines.map((c) => c.name), ...(isPartial(v) ? [] : ["Halal"])],
-        ...(v.price_band ? { priceRange: v.price_band } : {}),
-        ...(v.phone ? { telephone: telHref(v.phone) } : {}),
-        ...(v.address_line || v.postcode
-          ? {
-              address: {
-                "@type": "PostalAddress",
-                ...(v.address_line ? { streetAddress: v.address_line } : {}),
-                ...(v.area ? { addressLocality: v.area.name } : {}),
-                addressRegion: "Greater Manchester",
-                ...(v.postcode ? { postalCode: v.postcode } : {}),
-                addressCountry: "GB",
-              },
-            }
-          : {}),
-        ...(hoursSpec ? { openingHoursSpecification: hoursSpec } : {}),
-      },
-      {
-        "@type": "WebPage",
-        "@id": `${url}#webpage`,
-        url,
-        name: v.area ? `${v.name}, ${v.area.name}` : v.name,
-        description: metaDescription(v),
-        isPartOf: { "@id": `${SITE_URL}/#website` },
-        about: { "@id": `${url}#restaurant` },
-        breadcrumb: { "@id": `${url}#breadcrumb` },
-        ...(v.published_at ? { datePublished: v.published_at.slice(0, 10) } : {}),
-        ...(v.updated_at ? { dateModified: v.updated_at.slice(0, 10) } : {}),
-        inLanguage: "en-GB",
-        speakable: { "@type": "SpeakableSpecification", cssSelector: [".hfi-quotable"] },
-      },
-    ],
-  };
+  // facts shown as chips on the page (Halal info)
+  const features = [
+    ...(v.serves_alcohol !== null ? [{ "@type": "LocationFeatureSpecification", name: "Alcohol served", value: v.serves_alcohol }] : []),
+    ...(v.shared_kitchen !== null ? [{ "@type": "LocationFeatureSpecification", name: "Shared kitchen", value: v.shared_kitchen }] : []),
+  ];
+
+  return [
+    organizationNode(),
+    websiteNode(),
+    breadcrumbNode(url, crumbs),
+    {
+      "@type": placeType,
+      "@id": `${url}#restaurant`,
+      name: v.name,
+      url,
+      mainEntityOfPage: { "@id": `${url}#webpage` },
+      description: summary ?? quotableAnswer(v),
+      servesCuisine: [...v.cuisines.map((c) => c.name), ...(isPartial(v) ? [] : ["Halal"])],
+      ...(v.price_band ? { priceRange: v.price_band } : {}),
+      ...(v.phone ? { telephone: telHref(v.phone) } : {}),
+      ...(street || v.postcode
+        ? {
+            address: {
+              "@type": "PostalAddress",
+              ...(street ? { streetAddress: street } : {}),
+              ...(town ? { addressLocality: town } : {}),
+              addressRegion: "Greater Manchester",
+              ...(v.postcode ? { postalCode: v.postcode } : {}),
+              addressCountry: "GB",
+            },
+          }
+        : {}),
+      ...(v.point ? { geo: { "@type": "GeoCoordinates", latitude: round6(v.point.lat), longitude: round6(v.point.lng) } } : {}),
+      hasMap: mapsHref(v),
+      ...(v.area ? { containedInPlace: placeNode(v.area.slug === "city-centre" ? "Manchester city centre" : v.area.name) } : {}),
+      ...(website ? { sameAs: [website] } : {}),
+      ...(hoursSpec ? { openingHoursSpecification: hoursSpec } : {}),
+      ...(features.length ? { amenityFeature: features } : {}),
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${url}#webpage`,
+      url,
+      name: v.area ? `${v.name}, ${v.area.name}` : v.name,
+      description: metaDescription(v),
+      isPartOf: { "@id": WEBSITE_ID },
+      publisher: { "@id": ORG_ID },
+      about: { "@id": `${url}#restaurant` },
+      mainEntity: { "@id": `${url}#restaurant` },
+      breadcrumb: { "@id": `${url}#breadcrumb` },
+      ...(v.published_at ? { datePublished: v.published_at.slice(0, 10) } : {}),
+      ...(v.updated_at ? { dateModified: v.updated_at.slice(0, 10) } : {}),
+      inLanguage: "en-GB",
+      speakable: { "@type": "SpeakableSpecification", cssSelector: [".hfi-quotable"] },
+    },
+  ];
 }
 
 /* ── metadata (used by app/(site)/[slug]/page.tsx) ── */
@@ -259,7 +259,7 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(v)).replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd(v)) }}
       />
 
       {/* ── hero ── */}
