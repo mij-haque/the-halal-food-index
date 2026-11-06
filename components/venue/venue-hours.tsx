@@ -22,6 +22,13 @@ export function LiveStatus({ hours }: { hours: WeekHours | null }) {
   );
 }
 
+/** Plain-text status for the "Heading to ...?" band; shows `fallback` until known. */
+export function LiveStatusLine({ hours, fallback }: { hours: WeekHours | null; fallback: string }) {
+  const now = useNow();
+  const status = now ? openStatus(hours, now) : null;
+  return <>{status ? status.label : fallback}</>;
+}
+
 export function HoursTable({ hours }: { hours: WeekHours }) {
   const now = useNow();
   const today = now ? londonNow(now).day : null;

@@ -236,6 +236,17 @@ export function directionsHref(v: Venue, mode?: "transit" | "walking" | "driving
   return `https://www.google.com/maps/dir/?api=1&destination=${dest}${pid}${mode ? `&travelmode=${mode}` : ""}`;
 }
 
+/** "104 Derby St, Bolton" -> street "104 Derby St", town "Bolton". */
+export function splitAddress(line: string | null): { street: string | null; town: string | null } {
+  if (!line) return { street: null, town: null };
+  const parts = line.split(",").map((p) => p.trim()).filter(Boolean);
+  const last = parts[parts.length - 1];
+  if (parts.length > 1 && last && /^[A-Za-z][A-Za-z\s'-]*$/.test(last)) {
+    return { street: parts.slice(0, -1).join(", "), town: last };
+  }
+  return { street: line, town: null };
+}
+
 /** The venue on Google Maps (its own place page when we hold the place ID). */
 export function mapsHref(v: Venue): string {
   const q = encodeURIComponent([v.name, v.address_line, v.postcode].filter(Boolean).join(", "));
