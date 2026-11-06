@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { venueArt, zellijFill } from "@/lib/art";
-import { openStatus, type OpenStatus } from "@/lib/hours";
+import { openStatus } from "@/lib/hours";
 import { shortCount } from "@/lib/site";
 import { useNow } from "@/lib/use-now";
 import type { Facet, ListingVenue } from "@/lib/listings";
 import { CloseIcon, PinIcon } from "@/components/site/icons";
+import { StatusPill } from "@/components/site/status-pill";
 
 /*
  * Listing filters, sort and cards (design/listing-manchester.html, card option
@@ -472,22 +473,6 @@ function FilterGroups(p: GroupsProps) {
 }
 
 /* ── cards ── */
-
-const TONE: Record<OpenStatus["tone"], { pill: string; dot: string }> = {
-  open: { pill: "bg-hfi-green-bg text-hfi-ink", dot: "bg-hfi-green" },
-  soon: { pill: "bg-hfi-amber-bg text-[#5C3D02]", dot: "bg-hfi-amber" },
-  closed: { pill: "bg-hfi-pill text-hfi-t2", dot: "bg-hfi-t3" },
-};
-
-function StatusPill({ status }: { status: OpenStatus }) {
-  const t = TONE[status.tone];
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full py-[3px] pl-2 pr-2.5 text-[11.5px] font-semibold ${t.pill}`}>
-      <span className={`h-[7px] w-[7px] shrink-0 rounded-full ${t.dot}`} aria-hidden="true" />
-      {status.label}
-    </span>
-  );
-}
 
 function Rating({ v }: { v: ListingVenue }) {
   if (v.rating == null) return null;

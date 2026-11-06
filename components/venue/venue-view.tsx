@@ -8,6 +8,7 @@ import {
   fullAddress,
   isPartial,
   listedMonth,
+  mapsHref,
   placePhrase,
   quotableAnswer,
   safeWebsite,
@@ -19,8 +20,21 @@ import {
 } from "@/lib/venues";
 import { VenueSubnav, type SubnavLink } from "@/components/venue/venue-subnav";
 import { ReportChange } from "@/components/venue/report-change";
-import { HoursTable, OpenStatusPill } from "@/components/venue/venue-hours";
-import { AlertIcon, CheckIcon, GlassIcon, GlobeIcon, PhoneIcon, PhotoIcon, PinIcon } from "@/components/site/icons";
+import { HoursTable, LiveStatus } from "@/components/venue/venue-hours";
+import { ShareButton } from "@/components/venue/share-button";
+import { nearestStops, MAX_WALK_MINS, type NearStop } from "@/lib/transit";
+import {
+  AlertIcon,
+  CheckIcon,
+  DirectionsIcon,
+  GlassIcon,
+  GlobeIcon,
+  PhoneIcon,
+  PhotoIcon,
+  PinIcon,
+  TrainIcon,
+  TramIcon,
+} from "@/components/site/icons";
 
 /*
  * Venue page. Ported from design/venue-baraka-kitchen.html with the
@@ -29,7 +43,9 @@ import { AlertIcon, CheckIcon, GlassIcon, GlobeIcon, PhoneIcon, PhotoIcon, PinIc
  * the scope note. Alcohol and shared-kitchen facts show only when known.
  * Opening hours, star rating and review count come from Google Maps (the
  * maps-refresh job); the rating is shown as Google's, never in structured data.
- * Photos and the map are not in the data yet, so they are honest placeholders.
+ * No embedded map (BestDubai style): the address opens Google Maps, and
+ * "Getting there" names the nearest tram stop and train station (lib/transit.ts).
+ * Photos are not in the data yet, so the gallery is an honest placeholder.
  */
 
 /* ── helpers ── */
@@ -149,8 +165,10 @@ export function venueMetadata(v: Venue): Metadata {
 const sectionPad = "px-7 py-[52px] max-[640px]:px-5 max-[640px]:py-[38px]";
 const band = `hfi-band border-t border-hfi-hair bg-hfi-band ${sectionPad}`;
 const secS = "mb-[26px] max-w-[560px] text-[14.5px] text-hfi-t2";
-const ctaBtn =
-  "inline-flex shrink-0 items-center gap-[7px] rounded-full bg-hfi-orn px-[18px] py-[11px] text-[13px] font-bold text-white transition-colors hover:bg-hfi-orn-dark max-[1040px]:w-full max-[1040px]:justify-center";
+const btnBase =
+  "inline-flex shrink-0 items-center justify-center gap-[7px] rounded-full px-[17px] py-[10px] text-[13px] font-bold transition-[background-color,border-color,transform] duration-150 active:scale-[.97] motion-reduce:active:scale-100";
+const ctaBtn = `${btnBase} bg-hfi-orn text-white hover:bg-hfi-orn-dark`;
+const ghostBtn = `${btnBase} border border-hfi-border bg-hfi-surface text-hfi-ink hover:border-hfi-ink`;
 const soonBadge =
   "absolute left-[14px] top-[14px] z-[2] inline-flex items-center gap-1.5 rounded-full bg-[rgba(15,15,15,.55)] px-3 py-[7px] text-[11px] font-bold text-white backdrop-blur-[6px]";
 
@@ -197,6 +215,24 @@ function SimilarTile({ t }: { t: VenueTile }) {
   );
 }
 
+const STOP_LABEL: Record<NearStop["kind"], string> = { tram: "Metrolink tram stop", rail: "Train station" };
+
+function StopRow({ stop }: { stop: NearStop }) {
+  const Icon = stop.kind === "tram" ? TramIcon : TrainIcon;
+  return (
+    <li className="flex items-center gap-3 border-b border-hfi-divider py-3 last:border-b-0">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-hfi-pill text-hfi-ink">
+        <Icon className="h-[17px] w-[17px]" />
+      </span>
+      <span className="min-w-0 flex-1 leading-[1.3]">
+        <b className="block truncate text-[14px] font-semibold text-hfi-ink">{stop.name}</b>
+        <span className="block text-[12.5px] text-hfi-t3">{STOP_LABEL[stop.kind]}</span>
+      </span>
+      <span className="whitespace-nowrap text-[13px] font-semibold text-hfi-t2">{stop.walkMins} min walk</span>
+    </li>
+  );
+}
+
 /* ── view ── */
 
 export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
@@ -208,6 +244,8 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
   const address = fullAddress(v);
   const directions = directionsHref(v);
   const partial = isPartial(v);
+  const stops = nearestStops(v.point);
+  const nearby = [stops.tram, stops.rail].filter((s): s is NearStop => s !== null).sort((a, b) => a.walkMins - b.walkMins);
 
   const metaBits = [...v.cuisines.slice(0, 2).map((c) => c.name), ...(v.cuisines.length ? [] : [typeLabel(v.venue_type)])];
   if (v.area) metaBits.push(v.area.name);
@@ -289,6 +327,33 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
                 </span>
               </span>
             )}
+            <LiveStatus hours={v.hours} />
+          </div>
+
+          <div className="mb-[26px] flex flex-wrap gap-2 max-[640px]:grid max-[640px]:grid-cols-2">
+            <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
+              <DirectionsIcon className="h-[13px] w-[13px]" />
+              Directions
+            </a>
+            {v.phone && (
+              <a className={ghostBtn} href={`tel:${telHref(v.phone)}`} aria-label={`Call ${v.name}`}>
+                <PhoneIcon className="h-[14px] w-[14px]" />
+                Call
+              </a>
+            )}
+            {website && (
+              <a
+                className={ghostBtn}
+                href={website}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={isInstagram ? `See ${v.name} on Instagram` : `Visit ${v.name}'s website`}
+              >
+                <GlobeIcon className="h-[14px] w-[14px]" />
+                {isInstagram ? "Instagram" : "Website"}
+              </a>
+            )}
+            <ShareButton title={v.name} url={absolute(urls.venue(v.slug))} className={ghostBtn} />
           </div>
 
           <div className="relative mb-[26px]">
@@ -309,19 +374,13 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
           </div>
 
           <div className="border-t-2 border-hfi-brass px-0.5 pb-4 pt-[22px]">
-            <div className="mb-4 flex items-start justify-between gap-5 max-[1040px]:flex-col max-[1040px]:items-stretch max-[1040px]:gap-4">
-              <div className="flex items-start gap-2.5">
-                <span className="hfi-qmark mt-1.5 shrink-0 select-none text-[32px] leading-[.6] text-hfi-brass" aria-hidden="true">
-                  &ldquo;
-                </span>
-                <p className="hfi-quotable m-0 text-[17px] font-medium tracking-[-.1px] text-hfi-ink max-[640px]:text-[15px]">
-                  {quotableAnswer(v)}
-                </p>
-              </div>
-              <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
-                <PinIcon className="h-[13px] w-[13px]" />
-                Get directions
-              </a>
+            <div className="mb-4 flex items-start gap-2.5">
+              <span className="hfi-qmark mt-1.5 shrink-0 select-none text-[32px] leading-[.6] text-hfi-brass" aria-hidden="true">
+                &ldquo;
+              </span>
+              <p className="hfi-quotable m-0 text-[17px] font-medium tracking-[-.1px] text-hfi-ink max-[640px]:text-[15px]">
+                {quotableAnswer(v)}
+              </p>
             </div>
           </div>
         </div>
@@ -331,37 +390,10 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
 
       {/* ── overview + halal info ── */}
       <section className={`${band} scroll-mt-[122px]`} id="overview">
-        <div className="mx-auto max-w-[1180px]">
+        <div className="mx-auto max-w-[1180px]" data-reveal>
           <div className="grid grid-cols-2 max-[1040px]:grid-cols-1 max-[1040px]:gap-9">
             <div className="border-r border-hfi-divider pr-12 max-[1040px]:border-r-0 max-[1040px]:pr-0">
-              <div className="mb-[14px] flex flex-wrap items-center justify-between gap-4">
-                <h2 className="hfi-display-md">About {v.name}</h2>
-                {(v.phone || website) && (
-                  <div className="flex items-center gap-[9px]">
-                    {v.phone && (
-                      <a
-                        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-hfi-ink text-white transition-opacity hover:opacity-80"
-                        href={`tel:${telHref(v.phone)}`}
-                        aria-label={`Call ${v.name}`}
-                      >
-                        <PhoneIcon className="h-[15px] w-[15px]" />
-                      </a>
-                    )}
-                    {website && (
-                      <a
-                        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-hfi-ink text-white transition-opacity hover:opacity-80"
-                        href={website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={isInstagram ? `See ${v.name} on Instagram` : `Visit ${v.name}'s website`}
-                      >
-                        <GlobeIcon className="h-[15px] w-[15px]" />
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-              <OpenStatusPill hours={v.hours} />
+              <h2 className="hfi-display-md mb-[14px]">About {v.name}</h2>
               {summary ? (
                 <p className={secS}>{summary}</p>
               ) : (
@@ -425,7 +457,7 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
 
       {/* ── location ── */}
       <section className={`${sectionPad} scroll-mt-[122px]`} id="location">
-        <div className="mx-auto max-w-[1180px]">
+        <div className="mx-auto max-w-[1180px]" data-reveal>
           <div className="mb-[5px] flex items-baseline justify-between gap-4">
             <h2 className="hfi-display-md">Find {v.name}</h2>
           </div>
@@ -438,7 +470,22 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
               <p className="mb-1 text-sm text-hfi-t2">
                 <b className="text-hfi-ink">{v.name}</b>
               </p>
-              {address && <p className="mb-1 text-sm text-hfi-t2">{address}</p>}
+              {address && (
+                <p className="mb-1 text-sm text-hfi-t2">
+                  <a
+                    href={mapsHref(v)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-start gap-1.5 text-hfi-ink underline decoration-hfi-border underline-offset-[3px] transition-colors hover:decoration-hfi-ink"
+                  >
+                    <PinIcon className="mt-[3px] h-[13px] w-[13px] shrink-0 text-hfi-t3" />
+                    <span>
+                      {address}
+                      <span className="sr-only"> (opens Google Maps)</span>
+                    </span>
+                  </a>
+                </p>
+              )}
               {v.phone && (
                 <p className="mb-1 text-sm text-hfi-t2">
                   <a href={`tel:${telHref(v.phone)}`}>{v.phone}</a>
@@ -447,26 +494,43 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
               {v.hours ? (
                 <>
                   <HoursTable hours={v.hours} />
-                  <p className="mb-[22px] text-[12.5px] text-hfi-t3">
+                  <p className="text-[12.5px] text-hfi-t3">
                     Hours from Google Maps, updated monthly. Times can change, so check with the venue before a special trip.
                   </p>
                 </>
               ) : (
-                <p className="mb-[22px] mt-[14px] text-[13px] text-hfi-t3">Opening hours aren&apos;t listed yet. Check with the venue before you go.</p>
+                <p className="mt-[14px] text-[13px] text-hfi-t3">Opening hours aren&apos;t listed yet. Check with the venue before you go.</p>
               )}
-              <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
-                <PinIcon className="h-[13px] w-[13px]" />
-                Get directions
-              </a>
             </div>
 
-            <div className="relative aspect-[4/3.1] overflow-hidden rounded-2xl border border-hfi-border bg-hfi-pill shadow-[0_4px_18px_rgba(15,15,15,.07)]">
-              <span className="hfi-art opacity-90" dangerouslySetInnerHTML={{ __html: zellijSvg("map", colour, "rosette", 70, 400, 0.08) }} />
-              <div className="hfi-locpin" aria-hidden="true" />
-              <div className={soonBadge}>
-                <PhotoIcon className="h-3 w-3" />
-                Map coming soon
+            <div className="rounded-2xl border border-hfi-border bg-hfi-surface p-6 shadow-[0_4px_18px_rgba(15,15,15,.05)] max-[640px]:p-5">
+              <h3 className="mb-1 text-[15px] font-bold tracking-[-.1px] text-hfi-ink">Getting there</h3>
+              {v.point && nearby.length > 0 ? (
+                <ul className="mb-4">
+                  {nearby.map((s) => (
+                    <StopRow key={s.kind} stop={s} />
+                  ))}
+                </ul>
+              ) : (
+                <p className="mb-4 mt-2 text-[13.5px] text-hfi-t2">
+                  {v.point
+                    ? `No tram stop or train station within a ${MAX_WALK_MINS} minute walk. Google Maps can show bus routes.`
+                    : "Google Maps can plan your route by bus, tram or train."}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2 max-[640px]:grid max-[640px]:grid-cols-2">
+                <a className={ctaBtn} href={directions} target="_blank" rel="noopener noreferrer">
+                  <DirectionsIcon className="h-[13px] w-[13px]" />
+                  Directions
+                </a>
+                <a className={ghostBtn} href={directionsHref(v, "transit")} target="_blank" rel="noopener noreferrer">
+                  <TramIcon className="h-[14px] w-[14px]" />
+                  Public transport
+                </a>
               </div>
+              {nearby.length > 0 && (
+                <p className="mt-3 text-[12px] text-hfi-t3">Walking times are rough estimates from the nearest entrance.</p>
+              )}
             </div>
           </div>
         </div>
@@ -474,7 +538,7 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
 
       {/* ── similar + report ── */}
       <section className={`${band} scroll-mt-[122px]`} id={similar.length ? "similar" : "help"}>
-        <div className="mx-auto max-w-[1180px]">
+        <div className="mx-auto max-w-[1180px]" data-reveal>
           {similar.length > 0 && (
             <>
               <div className="mb-[5px] flex items-baseline justify-between gap-4">

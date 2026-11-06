@@ -89,27 +89,6 @@ html:has(.hfi-site) {
   mask-image: linear-gradient(to bottom, #000 0%, #000 42%, rgba(0, 0, 0, 0.12) 78%, rgba(0, 0, 0, 0) 96%);
 }
 
-/* map pin */
-.hfi-locpin {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -115%);
-  width: 38px;
-  height: 38px;
-  background: #0b6b45;
-  border-radius: 50% 50% 50% 0;
-  box-shadow: 0 4px 10px rgba(15, 15, 15, 0.25);
-  z-index: 2;
-}
-.hfi-locpin::after {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  background: #fff;
-  border-radius: 50%;
-}
-
 /* report toggle */
 .hfi-report summary {
   list-style: none;
@@ -238,6 +217,40 @@ html:has(.hfi-site) {
   display: inline-block;
   animation: hfi-tick 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+/* venue: the open/closed pill fades in once the browser has worked it out */
+.hfi-status-in {
+  animation: hfi-fade 0.3s ease-out both;
+}
+
+/* share: "Link copied" pops in (drop curve) */
+@keyframes hfi-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hfi-pop {
+  animation: hfi-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* reveal on scroll (components/site/reveal.tsx): blocks below the fold rise
+   in once. Content is in the HTML regardless; this only runs with JS. */
+.hfi-pre {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.hfi-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html:has(.hfi-site) {
     scroll-behavior: auto;
@@ -246,8 +259,14 @@ html:has(.hfi-site) {
   .hfi-drawer,
   .hfi-menu-scrim,
   .hfi-tick,
-  .hfi-cookie {
+  .hfi-cookie,
+  .hfi-status-in,
+  .hfi-pop {
     animation: none;
+  }
+  .hfi-pre {
+    opacity: 1;
+    transform: none;
   }
 }
 

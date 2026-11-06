@@ -4,6 +4,7 @@ import { noEmDash, urls } from "@/lib/site";
 import type { Area, Cuisine } from "@/lib/venues";
 import type { WeekHours } from "@/lib/hours";
 import { NO_FACTS, getPlaceFacts } from "@/lib/place-facts";
+import { parsePoint } from "@/lib/geo";
 
 /*
  * Data for the listing template (docs/decisions-update-listing-page.md):
@@ -34,26 +35,6 @@ export type ListingVenue = {
 };
 
 export type Facet = { slug: string; name: string; count: number };
-
-/* ── location: PostgREST returns PostGIS points as EWKB hex ── */
-
-function parsePoint(hex: unknown): { lat: number; lng: number } | null {
-  if (typeof hex !== "string" || !/^[0-9a-fA-F]+$/.test(hex) || hex.length < 42) return null;
-  try {
-    const buf = Buffer.from(hex, "hex");
-    const le = buf[0] === 1;
-    const type = le ? buf.readUInt32LE(1) : buf.readUInt32BE(1);
-    const hasSrid = (type & 0x20000000) !== 0;
-    if ((type & 0xff) !== 1) return null; // not a point
-    const off = hasSrid ? 9 : 5;
-    const x = le ? buf.readDoubleLE(off) : buf.readDoubleBE(off);
-    const y = le ? buf.readDoubleLE(off + 8) : buf.readDoubleBE(off + 8);
-    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-    return { lat: y, lng: x };
-  } catch {
-    return null;
-  }
-}
 
 /* ── queries ── */
 
