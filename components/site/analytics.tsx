@@ -72,8 +72,12 @@ export function Analytics() {
   if (!GTM_ID) return null;
 
   const choose = (v: "granted" | "denied") => {
+    const before = readChoice();
     saveChoice(v);
     window.gtag?.("consent", "update", { analytics_storage: v });
+    // The page they're on loaded before consent, so GA4 only got a cookieless
+    // ping for it. Count it now, so the session has a landing page.
+    if (v === "granted" && before !== "granted") window.gtag?.("event", "page_view");
     setShow(false);
   };
 
