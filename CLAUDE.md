@@ -38,7 +38,7 @@ Stack: Next.js 14 App Router, TypeScript, Tailwind, Supabase (Postgres 17 + Post
 - **Certification is not part of the product** (decision 3 Nov 2026, see
   `docs/decisions-update-no-certification.md`). Ignore the certification and "certificate seen"
   parts of the venue and chain mockups.
-- **IndexNow:** `indexnow_ping()` (pg_cron `indexnow-daily`, 04:41) sends pages changed in the last
+- **IndexNow:** `indexnow_ping()` (pg_cron `indexnow-daily`, 04:41) sends venue, category and chain pages changed in the last
   48 hours to Bing and friends. The key file is `public/9fd61dfc8540fbe191bdddee1b7905c8.txt`; keep both in step.
 - Old pre-v1 tables live in the `legacy` schema, locked from the API. Leave them alone.
 
@@ -130,7 +130,8 @@ Do not redesign. If something in a mockup conflicts with a decisions doc, the de
 1. ~~Supabase client and typed queries~~ (`lib/supabase/server.ts`, `lib/venues.ts`, `lib/listings.ts`)
 2. ~~Venue page~~ (`components/venue/venue-view.tsx`)
 3. ~~Listing page + area and cuisine pages~~ (`components/listing/`)
-4. Chain page from `design/chain-nandos-v12.html` (`chains`, `chain_items`,
+4. Chain pages: KFC live at `/is-kfc-halal` (`components/chain/`, `lib/chains.ts`). Next chains reuse it; set
+   `chains.published` only with owner sign-off. Original spec: `design/chain-nandos-v12.html` (`chains`, `chain_items`,
    `chain_branch_status`).
 5. Homepage from `design/homepage-v10.html` (then drop the `/` redirect in `next.config.mjs`).
 
