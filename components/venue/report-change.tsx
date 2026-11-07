@@ -20,7 +20,7 @@ function SubmitButton() {
   );
 }
 
-export function ReportChange({ venueId }: { venueId: string }) {
+export function ReportChange({ venueId, chainId }: { venueId?: string; chainId?: string }) {
   const [state, action] = useFormState<ReportState, FormData>(reportVenueChange, { status: "idle" });
 
   return (
@@ -34,7 +34,8 @@ export function ReportChange({ venueId }: { venueId: string }) {
           <p className="px-5 pb-[18px] text-[12.5px] font-semibold text-hfi-ink">Thanks, we&apos;ll look into this and update the page.</p>
         ) : (
           <form action={action} className="px-5 pb-[18px]">
-            <input type="hidden" name="venue_id" value={venueId} />
+            {venueId && <input type="hidden" name="venue_id" value={venueId} />}
+            {chainId && <input type="hidden" name="chain_id" value={chainId} />}
             <div className="hidden" aria-hidden="true">
               <label>
                 Leave this empty

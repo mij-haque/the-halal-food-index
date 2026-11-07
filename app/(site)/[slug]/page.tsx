@@ -6,11 +6,15 @@ import { ListingView, listingMetadata } from "@/components/listing/listing-view"
 import { getSimilarVenues, getVenue } from "@/lib/venues";
 import { areaHeading, cuisineDescriptor, cuisineHeading, getArea, getCuisine, getPublishedVenues } from "@/lib/listings";
 import { urls } from "@/lib/site";
+import { ChainView, chainMetadata } from "@/components/chain/chain-view";
+import { getChain } from "@/lib/chains";
+import type { VenueTile } from "@/lib/venues";
 
 /*
  * One flat route for three kinds of page (URL patterns in lib/site.ts):
  *   /halal-restaurants-{area}-manchester   area listing
  *   /halal-{cuisine}-manchester            cuisine listing
+ *   /is-{chain}-halal                      chain status page (published only on production)
  *   /{venue-slug}                          venue page (published only)
  * Anything else is a 404.
  */
@@ -21,6 +25,7 @@ type Props = { params: { slug: string } };
 
 const AREA_RE = /^halal-restaurants-([a-z0-9-]+)-manchester$/;
 const CUISINE_RE = /^halal-([a-z0-9-]+)-manchester$/;
+const CHAIN_RE = /^is-([a-z0-9-]+)-halal$/;
 
 const resolve = cache(async (slug: string) => {
   const am = AREA_RE.exec(slug);
@@ -41,6 +46,11 @@ const resolve = cache(async (slug: string) => {
       if (venues.length) return { kind: "cuisine" as const, cuisine, venues, all };
     }
   }
+  const chm = CHAIN_RE.exec(slug);
+  if (chm) {
+    const chain = await getChain(chm[1]);
+    if (chain) return { kind: "chain" as const, chain };
+  }
   const venue = await getVenue(slug);
   return venue ? { kind: "venue" as const, venue } : null;
 });
@@ -58,6 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const r = await resolve(params.slug);
   if (!r) return { title: "Page not found", robots: { index: false, follow: true } };
   if (r.kind === "venue") return venueMetadata(r.venue);
+  if (r.kind === "chain") return chainMetadata(r.chain);
   if (r.kind === "area") {
     const heading = areaHeading(r.area);
     return listingMetadata({
@@ -83,6 +94,21 @@ export default async function SlugPage({ params }: Props) {
   if (r.kind === "venue") {
     const similar = await getSimilarVenues(r.venue);
     return <VenueView v={r.venue} similar={similar} />;
+  }
+
+  if (r.kind === "chain") {
+    // Halal burger and chicken places whose whole menu is halal, as alternatives.
+    const all = await getPublishedVenues();
+    const similar: VenueTile[] = all
+      .filter((v) => !v.partialScope && v.cuisines.some((c) => c.slug === "burgers"))
+      .slice(0, 8)
+      .map((v) => ({
+        slug: v.slug,
+        name: v.name,
+        areaName: v.area?.name ?? null,
+        cuisine: v.cuisines[0] ? { id: v.cuisines[0].slug, ...v.cuisines[0] } : null,
+      }));
+    return <ChainView c={r.chain} similar={similar} />;
   }
 
   const flagship = { name: "Halal Restaurants in Manchester", href: urls.flagship() };
