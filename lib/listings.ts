@@ -134,14 +134,18 @@ export function cuisineFacets(list: ListingVenue[]): Facet[] {
 /* ── category page wording ── */
 
 // "Halal Indian Restaurants in Manchester", but "Halal Brunch in Manchester".
-const CUISINE_IS_FOOD = new Set(["brunch", "burgers", "desserts", "pizza"]);
+const CUISINE_IS_FOOD = new Set(["brunch", "burgers", "desserts", "pizza", "chicken", "grill", "chai", "fish-and-chips"]);
+// A cuisine that is already a kind of place: "Halal Steakhouses in Manchester".
+const CUISINE_IS_PLACE: Record<string, string> = { steakhouse: "Steakhouses" };
 
 export function cuisineHeading(c: { slug: string; name: string }): string {
+  if (CUISINE_IS_PLACE[c.slug]) return `Halal ${CUISINE_IS_PLACE[c.slug]} in Manchester`;
   return CUISINE_IS_FOOD.has(c.slug) ? `Halal ${c.name} in Manchester` : `Halal ${c.name} Restaurants in Manchester`;
 }
 
 /** Plural phrase for descriptions: "halal Indian restaurants", "places for halal brunch". */
 export function cuisineDescriptor(c: { slug: string; name: string }): string {
+  if (CUISINE_IS_PLACE[c.slug]) return `halal ${CUISINE_IS_PLACE[c.slug].toLowerCase()}`;
   return CUISINE_IS_FOOD.has(c.slug) ? `places for halal ${c.name.toLowerCase()}` : `halal ${c.name} restaurants`;
 }
 
@@ -155,6 +159,7 @@ export type RelatedLink = { label: string; href: string; count: number };
 
 /** Short chip wording: "Halal brunch in Manchester", "Halal Chinese in Manchester". */
 function cuisineChip(c: { slug: string; name: string }): string {
+  if (CUISINE_IS_PLACE[c.slug]) return `Halal ${CUISINE_IS_PLACE[c.slug].toLowerCase()} in Manchester`;
   return `Halal ${CUISINE_IS_FOOD.has(c.slug) ? c.name.toLowerCase() : c.name} in Manchester`;
 }
 
