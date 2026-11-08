@@ -96,13 +96,13 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
 
 export const getArea = cache(async (slug: string): Promise<Area | null> => {
   if (!/^[a-z0-9-]{1,80}$/.test(slug)) return null;
-  const { data } = await supabaseRead().from("areas").select("id, slug, name").eq("slug", slug).maybeSingle();
+  const { data } = await supabaseRead().from("areas").select("id, slug, name, intro").eq("slug", slug).maybeSingle();
   return (data as Area | null) ?? null;
 });
 
 export const getCuisine = cache(async (slug: string): Promise<Cuisine | null> => {
   if (!/^[a-z0-9-]{1,80}$/.test(slug)) return null;
-  const { data } = await supabaseRead().from("cuisines").select("id, slug, name, colour_hex").eq("slug", slug).maybeSingle();
+  const { data } = await supabaseRead().from("cuisines").select("id, slug, name, colour_hex, intro").eq("slug", slug).maybeSingle();
   return (data as Cuisine | null) ?? null;
 });
 
@@ -134,14 +134,18 @@ export function cuisineFacets(list: ListingVenue[]): Facet[] {
 /* ── category page wording ── */
 
 // "Halal Indian Restaurants in Manchester", but "Halal Brunch in Manchester".
-const CUISINE_IS_FOOD = new Set(["brunch", "burgers", "desserts", "pizza"]);
+const CUISINE_IS_FOOD = new Set(["brunch", "burgers", "desserts", "pizza", "chicken", "grill", "chai", "fish-and-chips"]);
+// A cuisine that is already a kind of place: "Halal Steakhouses in Manchester".
+const CUISINE_IS_PLACE: Record<string, string> = { steakhouse: "Steakhouses" };
 
 export function cuisineHeading(c: { slug: string; name: string }): string {
+  if (CUISINE_IS_PLACE[c.slug]) return `Halal ${CUISINE_IS_PLACE[c.slug]} in Manchester`;
   return CUISINE_IS_FOOD.has(c.slug) ? `Halal ${c.name} in Manchester` : `Halal ${c.name} Restaurants in Manchester`;
 }
 
 /** Plural phrase for descriptions: "halal Indian restaurants", "places for halal brunch". */
 export function cuisineDescriptor(c: { slug: string; name: string }): string {
+  if (CUISINE_IS_PLACE[c.slug]) return `halal ${CUISINE_IS_PLACE[c.slug].toLowerCase()}`;
   return CUISINE_IS_FOOD.has(c.slug) ? `places for halal ${c.name.toLowerCase()}` : `halal ${c.name} restaurants`;
 }
 
@@ -155,6 +159,7 @@ export type RelatedLink = { label: string; href: string; count: number };
 
 /** Short chip wording: "Halal brunch in Manchester", "Halal Chinese in Manchester". */
 function cuisineChip(c: { slug: string; name: string }): string {
+  if (CUISINE_IS_PLACE[c.slug]) return `Halal ${CUISINE_IS_PLACE[c.slug].toLowerCase()} in Manchester`;
   return `Halal ${CUISINE_IS_FOOD.has(c.slug) ? c.name.toLowerCase() : c.name} in Manchester`;
 }
 
@@ -176,7 +181,12 @@ export function relatedLinks(all: ListingVenue[], exclude?: string): RelatedLink
 }
 
 export function lastUpdated(list: ListingVenue[]): { label: string; iso: string } | null {
-  const latest = list.reduce<string | null>((m, v) => (v.publishedAt && (!m || v.publishedAt > m) ? v.publishedAt : m), null);
+  // Latest change to any listed venue (new listing, edited write-up, hours), not just
+  // the newest publish date, so the page date moves when its content does.
+  const latest = list.reduce<string | null>((m, v) => {
+    const d = [v.updatedAt, v.publishedAt].filter((x): x is string => Boolean(x)).sort().pop() ?? null;
+    return d && (!m || d > m) ? d : m;
+  }, null);
   if (!latest) return null;
   const d = new Date(latest);
   return {

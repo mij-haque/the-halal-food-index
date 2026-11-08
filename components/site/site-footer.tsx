@@ -49,9 +49,6 @@ export function SiteFooter({ currentAreaSlug }: { currentAreaSlug?: string }) {
             <Link href={urls.about()} className={flink}>
               About our listings
             </Link>
-            <Link href={urls.privacy()} className={flink}>
-              Privacy
-            </Link>
           </div>
         </div>
 

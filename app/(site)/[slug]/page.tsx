@@ -4,7 +4,16 @@ import { cache } from "react";
 import { VenueView, venueMetadata } from "@/components/venue/venue-view";
 import { ListingView, listingMetadata } from "@/components/listing/listing-view";
 import { getSimilarVenues, getVenue } from "@/lib/venues";
-import { areaHeading, cuisineDescriptor, cuisineHeading, getArea, getCuisine, getPublishedVenues } from "@/lib/listings";
+import {
+  MIN_LISTINGS_TO_INDEX,
+  areaHeading,
+  cuisineDescriptor,
+  cuisineFacets,
+  cuisineHeading,
+  getArea,
+  getCuisine,
+  getPublishedVenues,
+} from "@/lib/listings";
 import { urls } from "@/lib/site";
 import { ChainView, chainMetadata } from "@/components/chain/chain-view";
 import { getChain } from "@/lib/chains";
@@ -20,6 +29,14 @@ import type { VenueTile } from "@/lib/venues";
  */
 
 export const revalidate = 600;
+
+// No pages are built ahead of time, but returning a list (even an empty one)
+// makes Next.js cache each page after its first visit and refresh it every
+// `revalidate` seconds (ISR). Without this the route renders on every request.
+export const dynamicParams = true;
+export async function generateStaticParams(): Promise<Props["params"][]> {
+  return [];
+}
 
 type Props = { params: { slug: string } };
 
@@ -92,8 +109,12 @@ export default async function SlugPage({ params }: Props) {
   if (!r) notFound();
 
   if (r.kind === "venue") {
-    const similar = await getSimilarVenues(r.venue);
-    return <VenueView v={r.venue} similar={similar} />;
+    const [similar, all] = await Promise.all([getSimilarVenues(r.venue), getPublishedVenues()]);
+    // Link a cuisine only when its listing page is indexable (enough listings).
+    const linkedCuisines = cuisineFacets(all)
+      .filter((f) => f.count >= MIN_LISTINGS_TO_INDEX)
+      .map((f) => f.slug);
+    return <VenueView v={r.venue} similar={similar} linkedCuisines={linkedCuisines} />;
   }
 
   if (r.kind === "chain") {
@@ -119,7 +140,7 @@ export default async function SlugPage({ params }: Props) {
       <ListingView
         path={urls.area(r.area.slug)}
         heading={heading}
-        lede={areaLede(r.area.name)}
+        lede={r.area.intro?.trim() || areaLede(r.area.name)}
         crumbs={[flagship, { name: r.area.name, href: urls.area(r.area.slug) }]}
         venues={r.venues}
         allVenues={r.all}
@@ -134,7 +155,7 @@ export default async function SlugPage({ params }: Props) {
     <ListingView
       path={urls.cuisine(r.cuisine.slug)}
       heading={heading}
-      lede={cuisineLede(r.cuisine)}
+      lede={r.cuisine.intro?.trim() || cuisineLede(r.cuisine)}
       crumbs={[flagship, { name: r.cuisine.name, href: urls.cuisine(r.cuisine.slug) }]}
       venues={r.venues}
       allVenues={r.all}
