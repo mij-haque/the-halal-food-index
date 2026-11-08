@@ -37,6 +37,8 @@ export type Chain = {
   servesAlcohol: boolean | null;
   statementUrl: string | null;
   certifier: string | null;
+  /** Chain-specific line for the halal caveat box, from its own statement. */
+  caveat: string | null;
   reviewedAt: string | null;
   published: boolean;
   items: ChainItem[];
@@ -53,6 +55,7 @@ type Row = {
   serves_alcohol: boolean | null;
   statement_url: string | null;
   certifier: string | null;
+  caveat: string | null;
   last_reviewed_at: string | null;
   published: boolean;
   chain_items: Array<{ item_label: string; status: ChainStatus; note: string | null; sort_order: number | null }>;
@@ -68,7 +71,7 @@ type Row = {
   }>;
 };
 
-const SELECT = `id, slug, name, website, uk_status, status_summary, serves_alcohol, statement_url, certifier,
+const SELECT = `id, slug, name, website, uk_status, status_summary, serves_alcohol, statement_url, certifier, caveat,
   last_reviewed_at, published,
   chain_items(item_label, status, note, sort_order),
   chain_branch_status(id, branch_name, status, town, address_line, postcode, location, source_url)`;
@@ -91,6 +94,7 @@ export const getChain = cache(async (slug: string): Promise<Chain | null> => {
     servesAlcohol: r.serves_alcohol,
     statementUrl: r.statement_url,
     certifier: r.certifier,
+    caveat: r.caveat,
     reviewedAt: r.last_reviewed_at,
     published: r.published,
     items: [...(r.chain_items ?? [])]

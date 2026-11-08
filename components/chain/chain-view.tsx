@@ -22,6 +22,11 @@ const sectionPad = "px-7 py-[52px] max-[640px]:px-5 max-[640px]:py-[38px]";
 const band = `hfi-band border-t border-hfi-hair bg-hfi-band ${sectionPad}`;
 const secS = "mb-[26px] max-w-[560px] text-[14.5px] text-hfi-t2";
 
+/** "KFC's", but "Nando's" stays as it is (no "Nando's's"). */
+function possessive(name: string): string {
+  return /['’]s$/i.test(name) ? name : `${name}'s`;
+}
+
 function longDate(iso: string | null): { label: string; iso: string } | null {
   if (!iso) return null;
   const d = new Date(iso);
@@ -44,7 +49,7 @@ function answerParts(c: Chain) {
   const verdict = verdictWord(c.ukStatus);
   const tail =
     total > 0
-      ? `. In Greater Manchester, ${halal} of ${total} branches are halal, according to ${c.name}'s own website.`
+      ? `. In Greater Manchester, ${halal} of ${total} branches are halal, according to ${possessive(c.name)} own website.`
       : ".";
   return { lead, verdict, tail, text: `${lead}${verdict}${tail}` };
 }
@@ -53,7 +58,7 @@ function metaDescription(c: Chain): string {
   const { halal, total } = counts(c);
   const base = `${c.name} UK is ${verdictWord(c.ukStatus)}.`;
   return total
-    ? `${base} ${halal} of ${total} Greater Manchester branches serve halal food, according to ${c.name}'s own website. Find the nearest one.`
+    ? `${base} ${halal} of ${total} Greater Manchester branches serve halal food, according to ${possessive(c.name)} own website. Find the nearest one.`
     : base;
 }
 
@@ -246,7 +251,7 @@ export function ChainView({ c, similar }: { c: Chain; similar: VenueTile[] }) {
           </p>
           {total > 0 && <BranchFinder chainName={c.name} branches={finder} />}
           <p className="mt-3.5 rounded-xl border border-dashed border-hfi-border bg-hfi-bg px-[19px] py-[15px] text-[13px] text-hfi-t2">
-            Each branch&apos;s status comes from its own page on the {c.name} website
+            Each branch&apos;s status comes from the {c.name} website
             {reviewed ? `, read on ${reviewed.label}` : ""}. Branches can change, so check the {c.name} app before a special trip. Only
             Greater Manchester branches are listed for now.
           </p>
@@ -259,7 +264,7 @@ export function ChainView({ c, similar }: { c: Chain; similar: VenueTile[] }) {
           <div className="mb-[5px] flex items-baseline justify-between gap-4">
             <h2 className="hfi-display-md">What&apos;s halal at {c.name}</h2>
           </div>
-          <p className={secS}>From {c.name}&apos;s own halal statement.</p>
+          <p className={secS}>From {possessive(c.name)} own halal statement.</p>
           {c.items.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2.5">
               {c.items.map((i) => (
@@ -272,8 +277,8 @@ export function ChainView({ c, similar }: { c: Chain; similar: VenueTile[] }) {
               <AlertIcon className="mt-px h-[18px] w-[18px] shrink-0 text-hfi-amber" />
               <span>
                 <b className="text-[#4A3106]">Only branches {c.name} marks as halal serve halal food.</b> At every other branch the
-                chicken is not halal, so check the branch before you order. Some menu items and limited-time offers aren&apos;t sold at
-                halal branches.
+                chicken is not halal, so check the branch before you order.
+                {c.caveat ? ` ${c.caveat}` : ""}
                 {c.certifier ? ` ${c.name} names the ${c.certifier} as its certifier.` : ""}
               </span>
             </div>
@@ -281,7 +286,7 @@ export function ChainView({ c, similar }: { c: Chain; similar: VenueTile[] }) {
           <div className="flex flex-wrap gap-[18px] px-0.5 text-[13px]">
             {c.statementUrl && (
               <a href={c.statementUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-hfi-link">
-                {c.name}&apos;s halal statement
+                {possessive(c.name)} halal statement
               </a>
             )}
             {c.website && (
@@ -300,8 +305,8 @@ export function ChainView({ c, similar }: { c: Chain; similar: VenueTile[] }) {
             <>
               <div className="mb-[5px] flex items-baseline justify-between gap-4">
                 <h2 className="hfi-display-md">Halal chicken and burgers instead</h2>
-                <Link href={urls.cuisine("burgers")} className="whitespace-nowrap text-[13.5px] font-semibold text-hfi-link">
-                  All halal burgers →
+                <Link href={urls.cuisine("chicken")} className="whitespace-nowrap text-[13.5px] font-semibold text-hfi-link">
+                  All halal chicken →
                 </Link>
               </div>
               <p className={secS}>Independent places in Greater Manchester that say their whole menu is halal.</p>

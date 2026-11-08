@@ -177,6 +177,7 @@ export type Database = {
       }
       chains: {
         Row: {
+          caveat: string | null
           created_at: string | null
           id: string
           last_reviewed_at: string | null
@@ -190,6 +191,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          caveat?: string | null
           created_at?: string | null
           id?: string
           last_reviewed_at?: string | null
@@ -203,6 +205,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          caveat?: string | null
           created_at?: string | null
           id?: string
           last_reviewed_at?: string | null
