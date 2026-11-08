@@ -118,10 +118,13 @@ export default async function SlugPage({ params }: Props) {
   }
 
   if (r.kind === "chain") {
-    // Halal burger and chicken places whose whole menu is halal, as alternatives.
+    // Halal chicken and burger places whose whole menu is halal, as alternatives
+    // (chicken first: KFC and Nando's are chicken chains).
     const all = await getPublishedVenues();
+    const has = (v: (typeof all)[number], slug: string) => v.cuisines.some((c) => c.slug === slug);
     const similar: VenueTile[] = all
-      .filter((v) => !v.partialScope && v.cuisines.some((c) => c.slug === "burgers"))
+      .filter((v) => !v.partialScope && (has(v, "chicken") || has(v, "burgers")))
+      .sort((a, b) => Number(has(b, "chicken")) - Number(has(a, "chicken")))
       .slice(0, 8)
       .map((v) => ({
         slug: v.slug,
