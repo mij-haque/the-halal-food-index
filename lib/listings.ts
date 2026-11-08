@@ -96,13 +96,13 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
 
 export const getArea = cache(async (slug: string): Promise<Area | null> => {
   if (!/^[a-z0-9-]{1,80}$/.test(slug)) return null;
-  const { data } = await supabaseRead().from("areas").select("id, slug, name").eq("slug", slug).maybeSingle();
+  const { data } = await supabaseRead().from("areas").select("id, slug, name, intro").eq("slug", slug).maybeSingle();
   return (data as Area | null) ?? null;
 });
 
 export const getCuisine = cache(async (slug: string): Promise<Cuisine | null> => {
   if (!/^[a-z0-9-]{1,80}$/.test(slug)) return null;
-  const { data } = await supabaseRead().from("cuisines").select("id, slug, name, colour_hex").eq("slug", slug).maybeSingle();
+  const { data } = await supabaseRead().from("cuisines").select("id, slug, name, colour_hex, intro").eq("slug", slug).maybeSingle();
   return (data as Cuisine | null) ?? null;
 });
 
@@ -176,7 +176,12 @@ export function relatedLinks(all: ListingVenue[], exclude?: string): RelatedLink
 }
 
 export function lastUpdated(list: ListingVenue[]): { label: string; iso: string } | null {
-  const latest = list.reduce<string | null>((m, v) => (v.publishedAt && (!m || v.publishedAt > m) ? v.publishedAt : m), null);
+  // Latest change to any listed venue (new listing, edited write-up, hours), not just
+  // the newest publish date, so the page date moves when its content does.
+  const latest = list.reduce<string | null>((m, v) => {
+    const d = [v.updatedAt, v.publishedAt].filter((x): x is string => Boolean(x)).sort().pop() ?? null;
+    return d && (!m || d > m) ? d : m;
+  }, null);
   if (!latest) return null;
   const d = new Date(latest);
   return {

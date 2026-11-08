@@ -63,10 +63,24 @@ function pageTitle(v: Venue): string {
   return v.area ? `${v.name}, ${v.area.name}: ${kind}` : `${v.name}: ${kind}`;
 }
 
+const META_MAX = 158;
+
+/** Answer line plus as many whole write-up sentences as fit, so the snippet
+ * never stops mid-sentence. Only a single over-long sentence gets cut. */
 function metaDescription(v: Venue): string {
-  const parts = [quotableAnswer(v), summaryText(v)].filter(Boolean).join(" ");
-  if (parts.length <= 158) return parts;
-  const cut = parts.slice(0, 157);
+  const sentences = [quotableAnswer(v), summaryText(v)]
+    .filter((s): s is string => Boolean(s))
+    .join(" ")
+    .split(/(?<=[.!?])\s+/)
+    .filter(Boolean);
+  let out = "";
+  for (const s of sentences) {
+    const next = out ? `${out} ${s}` : s;
+    if (next.length > META_MAX) break;
+    out = next;
+  }
+  if (out) return out;
+  const cut = sentences[0].slice(0, META_MAX - 1);
   return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
 }
 
@@ -225,7 +239,16 @@ const darkBtn =
 
 /* ── view ── */
 
-export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
+export function VenueView({
+  v,
+  similar,
+  linkedCuisines = [],
+}: {
+  v: Venue;
+  similar: VenueTile[];
+  /** Cuisine slugs whose listing page is indexable; those cuisines link to it. */
+  linkedCuisines?: string[];
+}) {
   const colour = venueArt(v.slug, v.cuisines[0]).col;
   const listed = listedMonth(v.published_at);
   const website = safeWebsite(v.website);
@@ -239,9 +262,15 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
   const { street, town } = splitAddress(v.address_line);
   const addrRest = [town, v.postcode].filter(Boolean).join(", ");
 
-  const metaBits = [...v.cuisines.slice(0, 2).map((c) => c.name), ...(v.cuisines.length ? [] : [typeLabel(v.venue_type)])];
-  if (v.area) metaBits.push(v.area.name);
-  if (v.price_band) metaBits.push(v.price_band);
+  const metaBits: Array<{ label: string; href?: string }> = [
+    ...v.cuisines.slice(0, 2).map((c) => ({
+      label: c.name,
+      href: linkedCuisines.includes(c.slug) ? urls.cuisine(c.slug) : undefined,
+    })),
+    ...(v.cuisines.length ? [] : [{ label: typeLabel(v.venue_type) }]),
+  ];
+  if (v.area) metaBits.push({ label: v.area.name, href: urls.area(v.area.slug) });
+  if (v.price_band) metaBits.push({ label: v.price_band });
 
   const subnav: SubnavLink[] = [
     { id: "overview", label: "Overview" },
@@ -300,9 +329,15 @@ export function VenueView({ v, similar }: { v: Venue; similar: VenueTile[] }) {
             {metaBits.length > 0 && (
               <span className="flex flex-wrap items-center gap-2.5">
                 {metaBits.map((m, i) => (
-                  <span key={`${m}-${i}`} className="contents">
+                  <span key={`${m.label}-${i}`} className="contents">
                     {i > 0 && <span className="text-hfi-t3">·</span>}
-                    <span>{m}</span>
+                    {m.href ? (
+                      <Link href={m.href} className="underline decoration-hfi-border underline-offset-[3px] transition-colors hover:text-hfi-ink hover:decoration-hfi-ink">
+                        {m.label}
+                      </Link>
+                    ) : (
+                      <span>{m.label}</span>
+                    )}
                   </span>
                 ))}
               </span>

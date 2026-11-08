@@ -7,8 +7,8 @@ import { parsePoint, type LatLng } from "@/lib/geo";
 
 /* ── types ── */
 
-export type Cuisine = { id: string; slug: string; name: string; colour_hex: string };
-export type Area = { id: string; slug: string; name: string };
+export type Cuisine = { id: string; slug: string; name: string; colour_hex: string; intro?: string | null };
+export type Area = { id: string; slug: string; name: string; intro?: string | null };
 
 export type Venue = {
   id: string;

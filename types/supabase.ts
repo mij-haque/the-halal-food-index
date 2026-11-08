@@ -20,6 +20,7 @@ export type Database = {
           city: string
           created_at: string | null
           id: string
+          intro: string | null
           name: string
           parent_id: string | null
           region: string
@@ -30,6 +31,7 @@ export type Database = {
           city?: string
           created_at?: string | null
           id?: string
+          intro?: string | null
           name: string
           parent_id?: string | null
           region?: string
@@ -40,6 +42,7 @@ export type Database = {
           city?: string
           created_at?: string | null
           id?: string
+          intro?: string | null
           name?: string
           parent_id?: string | null
           region?: string
@@ -383,6 +386,7 @@ export type Database = {
           colour_hex: string
           created_at: string | null
           id: string
+          intro: string | null
           name: string
           pattern_key: string | null
           slug: string
@@ -392,6 +396,7 @@ export type Database = {
           colour_hex: string
           created_at?: string | null
           id?: string
+          intro?: string | null
           name: string
           pattern_key?: string | null
           slug: string
@@ -401,6 +406,7 @@ export type Database = {
           colour_hex?: string
           created_at?: string | null
           id?: string
+          intro?: string | null
           name?: string
           pattern_key?: string | null
           slug?: string
