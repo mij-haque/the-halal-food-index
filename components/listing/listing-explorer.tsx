@@ -25,11 +25,12 @@ import { StatusPill } from "@/components/site/status-pill";
  * Open/closed is worked out in the browser (pages are cached), so it appears
  * just after load and updates every minute.
  *
- * Card style: compact is the default while cards use zellij placeholders.
+ * Card style: compact is the default (A2 from the 9 Nov card review: name, gold
+ * rating chip, cuisine, "why go" tagline, open status; no placeholder tile).
  * Flip the default to "editorial" once real photos exist (listing decision).
  */
 
-type Sort = "az" | "newest" | "distance";
+type Sort = "top" | "az" | "newest" | "distance";
 type View = "compact" | "editorial";
 
 type Props = {
@@ -51,6 +52,19 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/*
+ * "Top rated": the Google rating, pulled towards a typical 4.4 when a place has
+ * few reviews (a 5.0 from 12 reviews shouldn't beat a 4.8 from 5,000).
+ * Places without a rating go last.
+ */
+const PRIOR_MEAN = 4.4;
+const PRIOR_WEIGHT = 100;
+function topScore(v: ListingVenue): number {
+  if (v.rating == null) return -1;
+  const n = v.reviewCount ?? 0;
+  return (n * v.rating + PRIOR_WEIGHT * PRIOR_MEAN) / (n + PRIOR_WEIGHT);
+}
+
 const roundBtn =
   "inline-flex min-h-[38px] cursor-pointer items-center gap-2 rounded-full border border-hfi-border bg-hfi-surface px-[15px] text-[13px] font-bold hover:border-hfi-t3";
 
@@ -59,7 +73,7 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
   const [cuisineSel, setCuisineSel] = useState<Set<string>>(new Set());
   const [scopeFull, setScopeFull] = useState(true);
   const [scopePartial, setScopePartial] = useState(true);
-  const [sort, setSort] = useState<Sort>("az");
+  const [sort, setSort] = useState<Sort>("top");
   const [view, setView] = useState<View>("compact");
   const [sideOpen, setSideOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -92,7 +106,8 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
     else if (sort === "distance" && coords) {
       const d = (v: ListingVenue) => (v.lat != null && v.lng != null ? haversineKm(coords.lat, coords.lng, v.lat, v.lng) : Infinity);
       out.sort((a, b) => d(a) - d(b));
-    } else out.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === "top") out.sort((a, b) => topScore(b) - topScore(a) || a.name.localeCompare(b.name));
+    else out.sort((a, b) => a.name.localeCompare(b.name));
     return out;
   }, [venues, areaSel, cuisineSel, scopeFull, scopePartial, sort, coords]);
 
@@ -164,8 +179,8 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
       return;
     }
     if (!navigator.geolocation) {
-      setLocNote("Location isn't available in this browser, so the list stays A to Z.");
-      setSort("az");
+      setLocNote("Location isn't available in this browser, so the list stays sorted by top rated.");
+      setSort("top");
       return;
     }
     setLocNote("Finding you…");
@@ -178,10 +193,10 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
       (err) => {
         setLocNote(
           err.code === 1
-            ? "Location permission was turned down, so the list stays A to Z."
-            : "We couldn't get your location, so the list stays A to Z.",
+            ? "Location permission was turned down, so the list stays sorted by top rated."
+            : "We couldn't get your location, so the list stays sorted by top rated.",
         );
-        setSort("az");
+        setSort("top");
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
     );
@@ -263,6 +278,7 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
               onChange={(e) => onSort(e.target.value as Sort)}
               className="hfi-sortsel min-h-[38px] cursor-pointer appearance-none rounded-full border border-hfi-border bg-hfi-surface py-0 pl-[14px] pr-[30px] text-[13px] font-semibold text-hfi-ink max-[640px]:w-full"
             >
+              <option value="top">Top rated</option>
               <option value="az">A to Z</option>
               <option value="newest">Newest first</option>
               <option value="distance">Nearest to me</option>
@@ -351,7 +367,7 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
                 <ul ref={gridRef} className={`relative grid ${gridCols}`} role="list">
                   {list.map((v) => (
                     <li key={v.slug} data-slug={v.slug} className="flex">
-                      {view === "editorial" ? <EditorialCard v={v} now={now} /> : <CompactCard v={v} now={now} />}
+                      {view === "editorial" ? <EditorialCard v={v} now={now} /> : <CompactCard v={v} now={now} showArea={areas.length > 0} />}
                     </li>
                   ))}
                 </ul>
@@ -474,23 +490,32 @@ function FilterGroups(p: GroupsProps) {
 
 /* ── cards ── */
 
-function Rating({ v }: { v: ListingVenue }) {
+/*
+ * Google rating as a small chip, shaded by how good it is (decision 9 Nov 2026).
+ * Gold, not green: green stays reserved for "open now". Bands are tight because
+ * most places sit between 4.3 and 4.9.
+ */
+function ratingTone(r: number): string {
+  if (r >= 4.8) return "border-hfi-gold bg-hfi-gold text-hfi-gold-ink";
+  if (r >= 4.5) return "border-hfi-gold-line bg-hfi-gold-bg text-hfi-gold-text";
+  if (r >= 4.0) return "border-hfi-pill bg-hfi-pill text-hfi-t2";
+  return "border-hfi-hair bg-hfi-surface text-hfi-t3";
+}
+
+function RatingChip({ v }: { v: ListingVenue }) {
   if (v.rating == null) return null;
   return (
-    <span className="inline-flex items-center gap-1 font-semibold text-hfi-ink">
-      <svg viewBox="0 0 24 24" fill="currentColor" className="h-3 w-3" aria-hidden="true">
-        <path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4-5.7-3.1-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" />
-      </svg>
-      <span className="sr-only">Google rating </span>
-      {v.rating.toFixed(1)}
+    <span className="inline-flex shrink-0 items-center gap-1.5">
       {v.reviewCount != null && (
-        <>
-          <span className="font-normal text-hfi-t3" aria-hidden="true">
-            ({shortCount(v.reviewCount)})
-          </span>
-          <span className="sr-only">, {v.reviewCount.toLocaleString("en-GB")} reviews</span>
-        </>
+        <span className="text-[11.5px] text-hfi-t3" aria-hidden="true">
+          ({shortCount(v.reviewCount)})
+        </span>
       )}
+      <span className={`inline-flex h-[22px] items-center rounded-md border px-[7px] text-[12.5px] font-bold leading-none ${ratingTone(v.rating)}`}>
+        <span className="sr-only">Google rating </span>
+        {v.rating.toFixed(1)}
+        {v.reviewCount != null && <span className="sr-only">, {v.reviewCount.toLocaleString("en-GB")} reviews</span>}
+      </span>
     </span>
   );
 }
@@ -505,39 +530,28 @@ function Area({ v }: { v: ListingVenue }) {
   );
 }
 
-function CompactCard({ v, now }: { v: ListingVenue; now: Date | null }) {
-  const art = venueArt(v.slug, v.cuisines[0]);
-  const lead = v.cuisines[0];
+function CompactCard({ v, now, showArea }: { v: ListingVenue; now: Date | null; showArea: boolean }) {
   const status = now ? openStatus(v.hours, now) : null;
+  const kind = v.cuisines.slice(0, 2).map((c) => c.name).join(", ");
+  const meta = [kind, showArea ? v.area?.name : null].filter(Boolean).join(" · ");
   return (
     <Link
       href={`/${v.slug}`}
       prefetch={false}
-      className="relative flex min-h-[132px] w-full gap-[13px] max-[640px]:min-h-0 rounded-xl border border-hfi-border bg-hfi-surface p-[17px] transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-[#D8D8D8] hover:shadow-[0_3px_13px_rgba(15,15,15,.06)] motion-reduce:hover:translate-y-0"
+      className="relative flex w-full flex-col gap-[5px] rounded-xl border border-hfi-border bg-hfi-surface px-4 py-[14px] transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-[#D8D8D8] hover:shadow-[0_3px_13px_rgba(15,15,15,.06)] motion-reduce:hover:translate-y-0"
     >
-      <span className="h-11 w-11 shrink-0 overflow-hidden rounded-[9px] [&_svg]:block [&_svg]:h-full [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: zellijFill(art) }} />
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="mb-auto flex flex-col">
-          {lead && (
-            <span className="mb-1.5 text-[10px] font-bold uppercase tracking-[.05em]" style={{ color: art.col }}>
-              {lead.name}
-            </span>
-          )}
-          <span className="text-[15.5px] font-bold leading-[1.22] tracking-[-.4px]">{v.name}</span>
-          {(v.area || v.rating != null) && (
-            <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-hfi-t2">
-              <Area v={v} />
-              <Rating v={v} />
-            </span>
-          )}
-        </span>
-        {status && (
-          <span className="mt-2.5 flex">
-            <StatusPill status={status} />
-          </span>
-        )}
-        {v.partialScope && <span className="mt-1.5 text-xs font-semibold text-hfi-t2">{v.partialScope}</span>}
+      <span className="flex items-start gap-2.5">
+        <span className="min-w-0 flex-1 font-display text-[16.5px] font-bold leading-[1.22] tracking-[-.3px]">{v.name}</span>
+        <RatingChip v={v} />
       </span>
+      {meta && <span className="text-[13px] text-hfi-t2">{meta}</span>}
+      {v.tagline && <span className="text-[14px] leading-[1.4] text-hfi-ink">{v.tagline}</span>}
+      {v.partialScope && <span className="text-xs font-semibold text-hfi-t2">{v.partialScope}</span>}
+      {status && (
+        <span className="mt-[3px] flex">
+          <StatusPill status={status} />
+        </span>
+      )}
     </Link>
   );
 }
@@ -566,7 +580,7 @@ function EditorialCard({ v, now }: { v: ListingVenue; now: Date | null }) {
             <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[12.5px] text-hfi-t2">
               {status && <StatusPill status={status} />}
               <Area v={v} />
-              <Rating v={v} />
+              <RatingChip v={v} />
             </span>
           )}
           {v.partialScope && <span className="text-xs font-semibold text-hfi-t2">{v.partialScope}</span>}
