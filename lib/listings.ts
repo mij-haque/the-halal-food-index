@@ -159,6 +159,39 @@ export function areaHeading(a: { slug: string; name: string }): string {
   return `Halal Food in ${a.name}`;
 }
 
+/**
+ * Deliberately built pages for one food type in one area. Added by hand when
+ * search data and enough listings justify them, never generated in bulk.
+ */
+export type ComboPage = {
+  slug: string;
+  areaSlug: string;
+  cuisineSlug: string;
+  heading: string;
+  crumb: string;
+  chip: string;
+  description: (count: number) => string;
+  intro: string;
+};
+
+export const COMBO_PAGES: ComboPage[] = [
+  {
+    slug: "halal-brunch-oldham",
+    areaSlug: "oldham",
+    cuisineSlug: "brunch",
+    heading: "Halal Breakfast & Brunch in Oldham",
+    crumb: "Breakfast & Brunch",
+    chip: "Halal brunch in Oldham",
+    description: (n) => `${n} places for halal breakfast and brunch in Oldham, Chadderton and Royton, with opening hours and what's on offer.`,
+    intro:
+      "Most of Oldham's brunch cafes are out towards Chadderton. Aura Cafe is on Victoria Street, The Baytree Cafe on Middleton Road and Bread & Butter on Chadderton Way, while Wonderlust Bistro sits on Library Lane in town. Bittersweet, in the Old Town Hall, does breakfasts as well as waffles and desserts. Khau Galli in Royton serves brunch too, and it does serve alcohol.",
+  },
+];
+
+export function comboVenues(page: ComboPage, all: ListingVenue[]): ListingVenue[] {
+  return all.filter((v) => v.area?.slug === page.areaSlug && v.cuisines.some((c) => c.slug === page.cuisineSlug));
+}
+
 export type RelatedLink = { label: string; href: string; count: number };
 
 /** Short chip wording: "Halal brunch in Manchester", "Halal Chinese in Manchester". */
@@ -181,7 +214,10 @@ export function relatedLinks(all: ListingVenue[], exclude?: string): RelatedLink
   const areas = areaFacets(all)
     .filter((f) => f.count >= MIN_LISTINGS_TO_INDEX)
     .map((f) => ({ label: areaChip(f), href: urls.area(f.slug), count: f.count }));
-  return [...cuisines, ...areas].filter((l) => l.href !== exclude);
+  const combos = COMBO_PAGES.map((p) => ({ label: p.chip, href: urls.combo(p.slug), count: comboVenues(p, all).length })).filter(
+    (l) => l.count >= MIN_LISTINGS_TO_INDEX,
+  );
+  return [...cuisines, ...combos, ...areas].filter((l) => l.href !== exclude);
 }
 
 export function lastUpdated(list: ListingVenue[]): { label: string; iso: string } | null {

@@ -28,7 +28,7 @@ export type ListingPageProps = {
   crumbs: Array<{ name: string; href: string }>; // excluding Home, last one is this page
   venues: ListingVenue[]; // venues on this page
   allVenues: ListingVenue[]; // every published venue, for related links
-  locked?: "area" | "cuisine";
+  locked?: "area" | "cuisine" | "both";
   /** The part of Greater Manchester this page covers, for structured data (area pages). */
   placeName?: string;
 };
@@ -142,8 +142,8 @@ export function ListingView(p: ListingPageProps) {
 
       <ListingExplorer
         venues={p.venues}
-        areas={p.locked === "area" ? [] : areaFacets(p.venues)}
-        cuisines={p.locked === "cuisine" ? [] : cuisineFacets(p.venues)}
+        areas={p.locked === "area" || p.locked === "both" ? [] : areaFacets(p.venues)}
+        cuisines={p.locked === "cuisine" || p.locked === "both" ? [] : cuisineFacets(p.venues)}
         showScopeFilter={p.venues.some((v) => v.partialScope)}
       />
 
