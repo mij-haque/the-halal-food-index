@@ -540,8 +540,8 @@ function CompactCard({ v, now, showArea }: { v: ListingVenue; now: Date | null; 
       prefetch={false}
       className="relative flex w-full flex-col gap-[5px] rounded-xl border border-hfi-border bg-hfi-surface px-4 py-[14px] transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-[#D8D8D8] hover:shadow-[0_3px_13px_rgba(15,15,15,.06)] motion-reduce:hover:translate-y-0"
     >
-      <span className="flex items-center gap-2.5">
-        <span className="min-w-0 flex-1 truncate font-display text-[16.5px] font-bold leading-[1.22] tracking-[-.3px]">{v.name}</span>
+      <span className="flex items-start gap-2.5">
+        <span className="min-w-0 flex-1 font-display text-[16.5px] font-bold leading-[1.22] tracking-[-.3px]">{v.name}</span>
         <RatingChip v={v} />
       </span>
       {meta && <span className="text-[13px] text-hfi-t2">{meta}</span>}
