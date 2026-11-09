@@ -21,3 +21,8 @@ Owner sign-off on the A2 card from the 9 Nov card review (canvas "HFI list card 
 ## Sort
 - Default sort is Top rated: the Google rating weighted by review count (pulled towards 4.4 with a
   weight of 100 reviews), unrated places last. A to Z, Newest and Nearest stay as options.
+
+## Quick filters (approved 9 Nov 2026)
+- Two chips above the results: "Open now" (needs hours; places without hours drop out while it's on) and
+  "Rated 4.5+". Selected state is ink. They are client-side only and never change the URL, so filtered
+  views stay unindexable.
