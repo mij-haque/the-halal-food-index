@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { venueArt, zellijFill } from "@/lib/art";
 import { openStatus } from "@/lib/hours";
 import { shortCount } from "@/lib/site";
@@ -57,6 +57,7 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
  * few reviews (a 5.0 from 12 reviews shouldn't beat a 4.8 from 5,000).
  * Places without a rating go last.
  */
+const TOP_RATING = 4.5; // the "4.5+" quick filter
 const PRIOR_MEAN = 4.4;
 const PRIOR_WEIGHT = 100;
 function topScore(v: ListingVenue): number {
@@ -73,6 +74,8 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
   const [cuisineSel, setCuisineSel] = useState<Set<string>>(new Set());
   const [scopeFull, setScopeFull] = useState(true);
   const [scopePartial, setScopePartial] = useState(true);
+  const [openOnly, setOpenOnly] = useState(false);
+  const [topOnly, setTopOnly] = useState(false);
   const [sort, setSort] = useState<Sort>("top");
   const [view, setView] = useState<View>("compact");
   const [sideOpen, setSideOpen] = useState(true);
@@ -100,6 +103,11 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
       if (areaSel.size && !(v.area && areaSel.has(v.area.slug))) return false;
       if (cuisineSel.size && !v.cuisines.some((c) => cuisineSel.has(c.slug))) return false;
       if (v.partialScope ? !scopePartial : !scopeFull) return false;
+      if (topOnly && !(v.rating != null && v.rating >= TOP_RATING)) return false;
+      if (openOnly && now) {
+        const st = openStatus(v.hours, now);
+        if (!st || st.tone === "closed") return false;
+      }
       return true;
     });
     if (sort === "newest") out.sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "") || a.name.localeCompare(b.name));
@@ -109,7 +117,7 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
     } else if (sort === "top") out.sort((a, b) => topScore(b) - topScore(a) || a.name.localeCompare(b.name));
     else out.sort((a, b) => a.name.localeCompare(b.name));
     return out;
-  }, [venues, areaSel, cuisineSel, scopeFull, scopePartial, sort, coords]);
+  }, [venues, areaSel, cuisineSel, scopeFull, scopePartial, sort, coords, openOnly, topOnly, now]);
 
   /* ── change animation (FLIP): note where each card is, change, then glide ── */
 
@@ -150,7 +158,7 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
     }
   }, [list]);
 
-  const activeCount = areaSel.size + cuisineSel.size + (!scopeFull || !scopePartial ? 1 : 0);
+  const activeCount = areaSel.size + cuisineSel.size + (!scopeFull || !scopePartial ? 1 : 0) + (openOnly ? 1 : 0) + (topOnly ? 1 : 0);
 
   const clearAll = () =>
     change(() => {
@@ -158,6 +166,8 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
       setCuisineSel(new Set());
       setScopeFull(true);
       setScopePartial(true);
+      setOpenOnly(false);
+      setTopOnly(false);
     });
 
   const toggleIn = (set: Set<string>, key: string, setter: (s: Set<string>) => void) =>
@@ -348,6 +358,15 @@ export function ListingExplorer({ venues, areas, cuisines, showScopeFilter }: Pr
             </div>
 
             <div className="col-start-2 row-start-1 min-w-0">
+              {/* Quick filters (A2 card review, 9 Nov). Selected state is ink, never green. */}
+              <div className="mb-[14px] flex flex-wrap gap-2" role="group" aria-label="Quick filters">
+                <QuickChip pressed={openOnly} onClick={() => change(() => setOpenOnly((b) => !b))}>
+                  Open now
+                </QuickChip>
+                <QuickChip pressed={topOnly} onClick={() => change(() => setTopOnly((b) => !b))}>
+                  Rated {TOP_RATING.toFixed(1)}+
+                </QuickChip>
+              </div>
               <p className="mb-[18px] text-[13.5px] text-hfi-t2" aria-live="polite">
                 <b key={tick} className={`font-bold text-hfi-ink ${tick ? "hfi-tick" : ""}`}>
                   {list.length}
@@ -485,6 +504,21 @@ function FilterGroups(p: GroupsProps) {
         </div>
       )}
     </>
+  );
+}
+
+function QuickChip({ pressed, onClick, children }: { pressed: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={`inline-flex min-h-[38px] cursor-pointer items-center rounded-full border px-[15px] text-[13px] font-semibold transition-colors ${
+        pressed ? "border-hfi-ink bg-hfi-ink text-white" : "border-hfi-border bg-hfi-surface text-hfi-ink hover:border-hfi-t3"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
