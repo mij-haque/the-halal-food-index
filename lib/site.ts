@@ -8,6 +8,7 @@
  *   area      /halal-restaurants-{area}-manchester
  *   cuisine   /halal-{cuisine}-manchester
  *   chain     /is-{chain}-halal
+ *   combo     /halal-{cuisine}-{area} (hand-picked, see COMBO_PAGES in lib/listings.ts)
  */
 
 export const SITE_NAME = "The Halal Food Index";
@@ -20,6 +21,7 @@ export const urls = {
   area: (areaSlug: string) => `/halal-restaurants-${areaSlug}-manchester`,
   cuisine: (cuisineSlug: string) => `/halal-${cuisineSlug}-manchester`,
   chain: (chainSlug: string) => `/is-${chainSlug}-halal`,
+  combo: (slug: string) => `/${slug}`,
   about: () => "/about",
   privacy: () => "/privacy",
   // Not built yet. Nothing links here until the page exists.

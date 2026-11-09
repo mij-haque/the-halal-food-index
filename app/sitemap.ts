@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { MIN_LISTINGS_TO_INDEX, areaFacets, cuisineFacets, getPublishedVenues } from "@/lib/listings";
+import { COMBO_PAGES, MIN_LISTINGS_TO_INDEX, areaFacets, comboVenues, cuisineFacets, getPublishedVenues } from "@/lib/listings";
 import { absolute, urls } from "@/lib/site";
 import { getPublishedChains } from "@/lib/chains";
 
@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categories = [
     ...areaFacets(all).filter((f) => f.count >= MIN_LISTINGS_TO_INDEX).map((f) => urls.area(f.slug)),
     ...cuisineFacets(all).filter((f) => f.count >= MIN_LISTINGS_TO_INDEX).map((f) => urls.cuisine(f.slug)),
+    ...COMBO_PAGES.filter((p) => comboVenues(p, all).length >= MIN_LISTINGS_TO_INDEX).map((p) => urls.combo(p.slug)),
   ];
 
   return [

@@ -5,8 +5,10 @@ import { VenueView, venueMetadata } from "@/components/venue/venue-view";
 import { ListingView, listingMetadata } from "@/components/listing/listing-view";
 import { getSimilarVenues, getVenue } from "@/lib/venues";
 import {
+  COMBO_PAGES,
   MIN_LISTINGS_TO_INDEX,
   areaHeading,
+  comboVenues,
   cuisineDescriptor,
   cuisineFacets,
   cuisineHeading,
@@ -23,6 +25,7 @@ import type { VenueTile } from "@/lib/venues";
  * One flat route for three kinds of page (URL patterns in lib/site.ts):
  *   /halal-restaurants-{area}-manchester   area listing
  *   /halal-{cuisine}-manchester            cuisine listing
+ *   /halal-{cuisine}-{area}                hand-picked combination (COMBO_PAGES)
  *   /is-{chain}-halal                      chain status page (published only on production)
  *   /{venue-slug}                          venue page (published only)
  * Anything else is a 404.
@@ -45,6 +48,12 @@ const CUISINE_RE = /^halal-([a-z0-9-]+)-manchester$/;
 const CHAIN_RE = /^is-([a-z0-9-]+)-halal$/;
 
 const resolve = cache(async (slug: string) => {
+  const combo = COMBO_PAGES.find((p) => p.slug === slug);
+  if (combo) {
+    const [area, all] = await Promise.all([getArea(combo.areaSlug), getPublishedVenues()]);
+    const venues = comboVenues(combo, all);
+    if (area && venues.length) return { kind: "combo" as const, combo, area, venues, all };
+  }
   const am = AREA_RE.exec(slug);
   if (am) {
     const area = await getArea(am[1]);
@@ -86,6 +95,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!r) return { title: "Page not found", robots: { index: false, follow: true } };
   if (r.kind === "venue") return venueMetadata(r.venue);
   if (r.kind === "chain") return chainMetadata(r.chain);
+  if (r.kind === "combo") {
+    return listingMetadata({
+      path: urls.combo(r.combo.slug),
+      title: r.combo.heading,
+      description: r.combo.description(r.venues.length),
+      count: r.venues.length,
+    });
+  }
   if (r.kind === "area") {
     const heading = areaHeading(r.area);
     return listingMetadata({
@@ -136,6 +153,25 @@ export default async function SlugPage({ params }: Props) {
   }
 
   const flagship = { name: "Halal Restaurants in Manchester", href: urls.flagship() };
+
+  if (r.kind === "combo") {
+    return (
+      <ListingView
+        path={urls.combo(r.combo.slug)}
+        heading={r.combo.heading}
+        lede={r.combo.intro}
+        crumbs={[
+          flagship,
+          { name: r.area.name, href: urls.area(r.area.slug) },
+          { name: r.combo.crumb, href: urls.combo(r.combo.slug) },
+        ]}
+        venues={r.venues}
+        allVenues={r.all}
+        locked="both"
+        placeName={r.area.name}
+      />
+    );
+  }
 
   if (r.kind === "area") {
     const heading = areaHeading(r.area);

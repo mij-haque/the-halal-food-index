@@ -279,10 +279,11 @@ export function VenueView({
     ...(similar.length ? [{ id: "similar", label: "Similar" }] : []),
   ];
 
-  const sourceLine =
-    v.verification_tier === "third_party"
-      ? "Listed in good faith, based on a trusted local halal food guide."
-      : `Listed in good faith, based on what ${v.name} says about itself.`;
+  const sourceBasis =
+    v.verification_tier === "third_party" ? "a trusted local halal food guide" : `what ${v.name} says about itself`;
+  // Answers "is X halal?" in plain words. A sentence, not a badge: see CLAUDE.md.
+  const answerLine = `${v.name} is listed as halal, based on ${sourceBasis}.`;
+  const sourceLine = partial ? `Listed in good faith, based on ${sourceBasis}.` : "Listed in good faith.";
 
   return (
     <>
@@ -522,6 +523,7 @@ export function VenueView({
                 id="halal"
               >
                 <h3 className="sr-only">Halal info</h3>
+                {!partial && <p className="m-0 text-[15px] font-semibold leading-[1.45] text-hfi-ink">{answerLine}</p>}
                 {v.serves_alcohol === true ? <GlassIcon className="h-5 w-5" /> : <NoAlcoholIcon className="h-5 w-5" />}
                 <b className="text-[15px]">
                   {v.serves_alcohol === false ? "No alcohol" : v.serves_alcohol === true ? "Serves alcohol" : "Alcohol not confirmed"}
