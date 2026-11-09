@@ -2,6 +2,7 @@ import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { Analytics } from "@/components/site/analytics";
+import { VisitCounter } from "@/components/site/visit-counter";
 import { Reveal } from "@/components/site/reveal";
 import { getPublishedCount } from "@/lib/venues";
 import "./site.css";
@@ -40,6 +41,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       </main>
       <SiteFooter />
       <Analytics />
+      <VisitCounter />
       <Reveal />
     </div>
   );

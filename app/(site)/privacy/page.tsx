@@ -7,7 +7,7 @@ const ANALYTICS = Boolean(GTM_ID);
 
 const DESCRIPTION = ANALYTICS
   ? "The Halal Food Index only sets analytics cookies if you say yes, never uses advertising cookies, and doesn't ask for your name or email."
-  : "The Halal Food Index doesn't use cookies or tracking and doesn't ask for your name or email. Here is what we keep and why.";
+  : "The Halal Food Index doesn't use cookies and doesn't ask for your name or email. Here is what we keep and why.";
 
 export const metadata: Metadata = textPageMetadata({ path: urls.privacy(), title: "Privacy", description: DESCRIPTION });
 
@@ -20,9 +20,9 @@ export default function PrivacyPage() {
       lede={
         ANALYTICS
           ? "The short version: no advertising, no analytics cookies unless you say yes, and we never ask for your name or email."
-          : "The short version: no cookies, no tracking, and we never ask for your name or email."
+          : "The short version: no cookies, and we never ask for your name or email."
       }
-      updated="4 November 2026"
+      updated="9 November 2026"
     >
       <TextSection title="What we keep">
         <p>
@@ -55,14 +55,22 @@ export default function PrivacyPage() {
         </TextSection>
       ) : (
         <TextSection title="Cookies and tracking">
-          <p>We don&apos;t set cookies, and we don&apos;t use analytics, advertising or tracking scripts.</p>
+          <p>We don&apos;t set cookies, and we don&apos;t use advertising scripts.</p>
         </TextSection>
       )}
+
+      <TextSection title="Counting visits without cookies">
+        <p>
+          We also use Vercel Web Analytics to count how many people visit and which pages they view. It doesn&apos;t use cookies, so it runs
+          whatever you choose on our cookie message. It records anonymous details such as the page, the site you came from, your rough
+          location, and your device and browser type. It can&apos;t follow you between days or across other websites.
+        </p>
+      </TextSection>
 
       <TextSection title="Who runs the site for us">
         <p>
           The site is hosted by Vercel, and our listings and any reports you send are stored with Supabase in London.
-          {ANALYTICS && " Visit statistics are processed by Google Analytics."} Like any website, their servers keep short-lived technical
+          {ANALYTICS ? " Visit statistics are processed by Google Analytics and Vercel." : " Visit statistics are processed by Vercel."} Like any website, their servers keep short-lived technical
           logs, such as IP addresses, to keep the service running and secure.
         </p>
       </TextSection>
