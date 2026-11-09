@@ -32,6 +32,12 @@ const config: Config = {
           red: "#C02929",
           "red-bg": "#FAEAEA",
           link: "#1F56BA",
+          // Google rating chip only (decision 9 Nov 2026): a warm gold from the brass family.
+          gold: "#E2A93B",
+          "gold-ink": "#2A1C04",
+          "gold-bg": "#FCEFCF",
+          "gold-text": "#7A5210",
+          "gold-line": "#F3DCA0",
         },
       },
       fontFamily: {

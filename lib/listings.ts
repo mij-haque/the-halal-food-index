@@ -24,6 +24,8 @@ export type ListingVenue = {
   area: { slug: string; name: string } | null;
   cuisines: Array<{ slug: string; name: string; colour_hex: string }>;
   partialScope: string | null; // set only for partial venues
+  /** One short "why go" line for the card (owner-approved). */
+  tagline: string | null;
   servesAlcohol: boolean | null;
   /** Google Maps facts (cached by the maps-refresh job). Null when we don't hold them. */
   rating: number | null;
@@ -47,6 +49,7 @@ type Row = {
   halal_status: string;
   halal_scope: string | null;
   serves_alcohol: boolean | null;
+  tagline: string | null;
   location: unknown;
   published_at: string | null;
   updated_at: string | null;
@@ -60,7 +63,7 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
     supabaseRead()
       .from("venues")
       .select(
-        "slug, name, venue_type, halal_status, halal_scope, serves_alcohol, location, published_at, updated_at, area:areas(slug, name), venue_cuisines(is_primary, cuisine:cuisines(id, slug, name, colour_hex))",
+        "slug, name, venue_type, halal_status, halal_scope, serves_alcohol, tagline, location, published_at, updated_at, area:areas(slug, name), venue_cuisines(is_primary, cuisine:cuisines(id, slug, name, colour_hex))",
       )
       .eq("status", "published")
       .order("name"),
@@ -83,6 +86,7 @@ export const getPublishedVenues = cache(async (): Promise<ListingVenue[]> => {
       cuisines,
       partialScope: r.halal_status === "partial" && r.halal_scope ? noEmDash(r.halal_scope.trim()) : null,
       servesAlcohol: r.serves_alcohol,
+      tagline: r.tagline?.trim() ? noEmDash(r.tagline.trim()) : null,
       rating: f.rating,
       reviewCount: f.reviewCount,
       hours: f.hours,
