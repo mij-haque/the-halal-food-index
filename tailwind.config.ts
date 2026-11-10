@@ -20,7 +20,7 @@ const config: Config = {
           divider: "#F1F1F1",
           ink: "#0F0F0F",
           t2: "#51514E",
-          t3: "#8C8C89",
+          t3: "#6B6B68",
           pill: "#EFEFEF",
           green: "#0B8F5A",
           "green-bg": "#E4F4EC",
