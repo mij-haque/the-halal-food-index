@@ -462,7 +462,7 @@ function FilterGroups(p: GroupsProps) {
     <>
       {p.showScopeFilter && (
         <div className="py-[22px] first:pt-0">
-          <h3 className={groupHead}>Halal scope</h3>
+          <h2 className={groupHead}>Halal scope</h2>
           <div>
             <label className={checkRow}>
               <input type="checkbox" className={checkbox} checked={p.scopeFull} onChange={(e) => p.setScopeFull(e.target.checked)} />
@@ -477,7 +477,7 @@ function FilterGroups(p: GroupsProps) {
       )}
       {p.cuisines.length > 0 && (
         <div className="py-[22px] first:pt-0">
-          <h3 className={groupHead}>Cuisine</h3>
+          <h2 className={groupHead}>Cuisine</h2>
           <div>
             {p.cuisines.map((c) => (
               <label key={c.slug} className={checkRow}>
@@ -491,7 +491,7 @@ function FilterGroups(p: GroupsProps) {
       )}
       {p.areas.length > 0 && (
         <div className="py-[22px] first:pt-0">
-          <h3 className={groupHead}>Area</h3>
+          <h2 className={groupHead}>Area</h2>
           <div>
             {p.areas.map((a) => (
               <label key={a.slug} className={checkRow}>

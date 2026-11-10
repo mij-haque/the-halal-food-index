@@ -21,7 +21,7 @@ export function SiteFooter({ currentAreaSlug }: { currentAreaSlug?: string }) {
             </p>
           </div>
           <div>
-            <h4 className={fhead}>Cuisines</h4>
+            <h2 className={fhead}>Cuisines</h2>
             {footerCuisines.map((c) => (
               <Link key={c.label} href={c.href} className={flink}>
                 {c.label}
@@ -29,7 +29,7 @@ export function SiteFooter({ currentAreaSlug }: { currentAreaSlug?: string }) {
             ))}
           </div>
           <div>
-            <h4 className={fhead}>Areas</h4>
+            <h2 className={fhead}>Areas</h2>
             {footerAreas.map((a) => (
               <Link
                 key={a.slug}
@@ -45,7 +45,7 @@ export function SiteFooter({ currentAreaSlug }: { currentAreaSlug?: string }) {
             </Link>
           </div>
           <div>
-            <h4 className={fhead}>The Index</h4>
+            <h2 className={fhead}>The Index</h2>
             <Link href={urls.about()} className={flink}>
               About our listings
             </Link>
