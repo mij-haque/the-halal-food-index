@@ -21,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absolute(urls.flagship()), lastModified, changeFrequency: "daily", priority: 1 },
     { url: absolute(urls.about()), lastModified: new Date("2026-11-06"), changeFrequency: "yearly" as const, priority: 0.3 },
     { url: absolute(urls.privacy()), changeFrequency: "yearly" as const, priority: 0.1 },
+    { url: absolute(urls.christmasMarkets()), lastModified: new Date("2026-11-11"), changeFrequency: "weekly" as const, priority: 0.8 },
     ...chains.map((c) => ({
       url: absolute(urls.chain(c.slug)),
       lastModified: c.reviewedAt ? new Date(c.reviewedAt) : lastModified,
