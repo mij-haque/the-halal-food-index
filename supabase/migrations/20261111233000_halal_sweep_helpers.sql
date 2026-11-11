@@ -1,0 +1,9 @@
+-- Helpers used when turning halal sweep results into draft venues.
+-- sweep_area: postcode -> areas.slug. sweep_cuisines: Google categories (+ name) -> cuisines.slug[].
+-- Not callable from the API. Full definitions applied live on 11 Nov 2026 (see Supabase migration
+-- halal_sweep_helpers); kept here as the record.
+-- Postcode districts: OL1-4,8,9,M35 Oldham; OL5-7,SK14-16,M34,M43 Tameside; OL10-16,M24 Rochdale;
+-- BL0,8,9,M25,26,45 Bury; BL1-7 Bolton; WN,M29 Wigan; SK1-8 Stockport; M1-4 City Centre;
+-- M5,6,7,27,28,30,38,44,50 Salford; M8 Cheetham Hill; M12,13 Longsight; M14 4 Moss Side;
+-- M14 6/7 Fallowfield; other M14 Rusholme; M19 Levenshulme; M20 3/4 Withington; other M20 Didsbury;
+-- M21 Chorlton; M17 Trafford Centre; M31,32,33,41,WA14,15 Trafford; other M Manchester.
