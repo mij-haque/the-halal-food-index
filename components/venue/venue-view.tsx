@@ -58,9 +58,13 @@ const GALLERY: Array<{ kind: ZellijKind; unit: number; bg: number }> = [
   { kind: "rosette", unit: 44, bg: 0.09 },
 ];
 
+// Phrased the way people search ("is X halal"). The H1 stays the venue name.
 function pageTitle(v: Venue): string {
-  const kind = [isPartial(v) ? null : "Halal", v.cuisines[0]?.name, typeLabel(v.venue_type)].filter(Boolean).join(" ");
-  return v.area ? `${v.name}, ${v.area.name}: ${kind}` : `${v.name}: ${kind}`;
+  const answer = isPartial(v) ? "Partly" : "Yes";
+  // Skip the area when the name already carries it ("Burger Stop Salford").
+  const area = v.area && !v.name.toLowerCase().includes(v.area.name.toLowerCase()) ? v.area.name : null;
+  const kind = [area, v.cuisines[0]?.name, typeLabel(v.venue_type)].filter(Boolean).join(" ");
+  return `Is ${v.name} Halal? ${answer}. ${kind}`;
 }
 
 const META_MAX = 158;
