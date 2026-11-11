@@ -140,7 +140,8 @@ export function cuisineFacets(list: ListingVenue[]): Facet[] {
 // "Halal Indian Restaurants in Manchester", but "Halal Brunch in Manchester".
 const CUISINE_IS_FOOD = new Set(["brunch", "burgers", "desserts", "pizza", "chicken", "grill", "chai", "fish-and-chips"]);
 // A cuisine that is already a kind of place: "Halal Steakhouses in Manchester".
-const CUISINE_IS_PLACE: Record<string, string> = { steakhouse: "Steakhouses" };
+// Brunch reads "Breakfast & Brunch" because people search "halal breakfast" too.
+const CUISINE_IS_PLACE: Record<string, string> = { steakhouse: "Steakhouses", brunch: "Breakfast & Brunch" };
 
 export function cuisineHeading(c: { slug: string; name: string }): string {
   if (CUISINE_IS_PLACE[c.slug]) return `Halal ${CUISINE_IS_PLACE[c.slug]} in Manchester`;
@@ -149,6 +150,7 @@ export function cuisineHeading(c: { slug: string; name: string }): string {
 
 /** Plural phrase for descriptions: "halal Indian restaurants", "places for halal brunch". */
 export function cuisineDescriptor(c: { slug: string; name: string }): string {
+  if (c.slug === "brunch") return "places for halal breakfast and brunch";
   if (CUISINE_IS_PLACE[c.slug]) return `halal ${CUISINE_IS_PLACE[c.slug].toLowerCase()}`;
   return CUISINE_IS_FOOD.has(c.slug) ? `places for halal ${c.name.toLowerCase()}` : `halal ${c.name} restaurants`;
 }
