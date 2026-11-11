@@ -24,6 +24,7 @@ export const urls = {
   combo: (slug: string) => `/${slug}`,
   about: () => "/about",
   privacy: () => "/privacy",
+  christmasMarkets: () => "/halal-manchester-christmas-markets",
   // Not built yet. Nothing links here until the page exists.
   allChains: () => "/chains",
   collections: () => "/collections",
