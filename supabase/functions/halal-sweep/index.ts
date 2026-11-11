@@ -7,6 +7,7 @@
 //
 // POST {"start": true}  starts a sweep (refused if one is still running).
 // POST {}               ingests a finished sweep, otherwise reports progress.
+// POST {"abort": true}  stops a running sweep and keeps what it found so far.
 //
 // Auth: header x-refresh-key must match the Vault secret "maps_refresh_key".
 // Secrets: APIFY_TOKEN (set by the owner in the Supabase dashboard).
@@ -16,7 +17,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 const ACTOR = "compass~crawler-google-places";
 const APIFY = "https://api.apify.com/v2";
 const PER_SEARCH = 50;
-const MAX_CHARGE_USD = 15; // hard spending cap for one sweep
+const MAX_CHARGE_USD = 4; // hard spending cap for one sweep (owner set 11 Nov 2026)
 
 const AREAS = [
   "Manchester city centre", "Rusholme", "Longsight", "Levenshulme", "Cheetham Hill", "Crumpsall",
@@ -77,8 +78,9 @@ function row(item: Item, runId: string) {
 async function ingest(run: { id: string; apify_run_id: string; dataset_id: string | null }) {
   const info = await apify(`/actor-runs/${run.apify_run_id}`);
   const status = info?.data?.status;
-  if (status !== "SUCCEEDED") {
-    if (["FAILED", "ABORTED", "TIMED-OUT", "TIMED_OUT"].includes(status)) {
+  // An aborted run still has a dataset of what it found before stopping.
+  if (status !== "SUCCEEDED" && status !== "ABORTED") {
+    if (["FAILED", "TIMED-OUT", "TIMED_OUT"].includes(status)) {
       await db.from("halal_sweep_runs").update({ status: "failed", finished_at: new Date().toISOString(), result: { apify_status: status } }).eq("id", run.id);
       return { failed: status };
     }
@@ -112,6 +114,10 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { data: open, error } = await db.from("halal_sweep_runs").select("id, apify_run_id, dataset_id").eq("status", "running");
     if (error) throw error;
+    if (open?.length && body?.abort) {
+      for (const r of open) await apify(`/actor-runs/${r.apify_run_id}/abort`, { method: "POST" });
+      return json({ ok: true, aborted: open.map((r) => r.apify_run_id) });
+    }
     if (open?.length) {
       const report: Record<string, unknown> = {};
       for (const r of open) report[r.apify_run_id] = await ingest(r);
