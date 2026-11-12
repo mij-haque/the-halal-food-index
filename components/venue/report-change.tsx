@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { reportVenueChange, type ReportState } from "@/app/(site)/[slug]/actions";
 import { ChevronDownIcon } from "@/components/site/icons";
@@ -22,6 +23,9 @@ function SubmitButton() {
 
 export function ReportChange({ venueId, chainId }: { venueId?: string; chainId?: string }) {
   const [state, action] = useFormState<ReportState, FormData>(reportVenueChange, { status: "idle" });
+  // When the form appeared in the browser. Bots tend to submit within a second or two.
+  const [shownAt, setShownAt] = useState("");
+  useEffect(() => setShownAt(String(Date.now())), []);
 
   return (
     <div className="overflow-hidden rounded-[14px] border border-hfi-border bg-hfi-surface">
@@ -36,6 +40,7 @@ export function ReportChange({ venueId, chainId }: { venueId?: string; chainId?:
           <form action={action} className="px-5 pb-[18px]">
             {venueId && <input type="hidden" name="venue_id" value={venueId} />}
             {chainId && <input type="hidden" name="chain_id" value={chainId} />}
+            <input type="hidden" name="shown_at" value={shownAt} />
             <div className="hidden" aria-hidden="true">
               <label>
                 Leave this empty
