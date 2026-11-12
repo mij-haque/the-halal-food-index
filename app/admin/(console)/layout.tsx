@@ -14,7 +14,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex min-h-screen flex-wrap">
-      <nav aria-label="Admin" className="flex w-full flex-col gap-7 bg-[#111312] px-4 py-6 text-[#EDEDEA] md:w-[248px] md:shrink-0">
+      <nav aria-label="Admin" className="flex w-full flex-col gap-4 bg-[#111312] px-4 py-4 text-[#EDEDEA] md:w-[248px] md:shrink-0 md:gap-7 md:py-6">
         <div className="flex items-center gap-3 px-2">
           <Seal />
           <div className="flex flex-col">
@@ -22,19 +22,24 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
             <span className="text-[12px] text-[#A3A39D]">Admin</span>
           </div>
         </div>
-        <div className="flex flex-col gap-0.5">
-          <a href="/admin" className="flex items-center justify-between rounded-lg bg-[#1F2321] px-3 py-2.5 font-semibold text-white">
+        <div className="flex flex-row flex-wrap gap-0.5 md:flex-col">
+          <a href="/admin" className="flex items-center justify-between gap-3 rounded-lg bg-[#1F2321] px-3 py-2.5 font-semibold text-white">
             Review
             {counts.review > 0 && <span className="rounded-full bg-hfi-amber px-2 py-0.5 text-[12px] text-white">{counts.review}</span>}
           </a>
-          <span className="flex items-center justify-between px-3 py-2.5 text-[#8F8F89]">
+          <form action="/admin/logout" method="post" className="ml-auto md:hidden">
+            <button type="submit" className="px-3 py-2.5 text-[13px] text-[#A3A39D]">
+              Sign out
+            </button>
+          </form>
+          <span className="hidden items-center justify-between px-3 py-2.5 text-[#8F8F89] md:flex">
             Mission control <span className="text-[11px]">soon</span>
           </span>
-          <span className="flex items-center justify-between px-3 py-2.5 text-[#8F8F89]">
+          <span className="hidden items-center justify-between px-3 py-2.5 text-[#8F8F89] md:flex">
             Add places <span className="text-[11px]">soon</span>
           </span>
         </div>
-        <div className="flex flex-col gap-2.5 px-3">
+        <div className="hidden flex-col gap-2.5 px-3 md:flex">
           <span className="text-[11px] uppercase tracking-[.08em] text-[#8F8F89]">Jobs</span>
           {jobs.map((j) => (
             <div key={j.name} className="flex items-center gap-2.5 text-[13px]" title={`${j.status}. ${j.when}`}>
@@ -43,7 +48,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
             </div>
           ))}
         </div>
-        <div className="mt-auto flex flex-col gap-0.5 border-t border-[#2A2E2C] px-3 pt-4">
+        <div className="hidden flex-col gap-0.5 border-t border-[#2A2E2C] px-3 pt-4 md:mt-auto md:flex">
           <span className="font-display text-[26px] font-bold">{counts.published}</span>
           <span className="text-[12px] text-[#A3A39D]">places live · {counts.draft} in backlog</span>
           <form action="/admin/logout" method="post" className="mt-3">

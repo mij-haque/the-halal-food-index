@@ -120,9 +120,9 @@ export function ReviewQueue({ rows }: { rows: ReviewRow[] }) {
         </label>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-hfi-hair bg-white">
-        <div className="min-w-[860px]">
-          <div className="grid grid-cols-[40px_minmax(0,2.2fr)_minmax(0,1.6fr)_150px_150px_56px] items-center gap-4 border-b border-hfi-divider px-5 py-3 text-[12px] text-hfi-t3">
+      <div className="hidden overflow-x-auto rounded-xl border border-hfi-hair bg-white md:block">
+        <div className="min-w-[920px]">
+          <div className="grid grid-cols-[40px_minmax(0,2.2fr)_minmax(0,1.6fr)_150px_210px_56px] items-center gap-4 border-b border-hfi-divider px-5 py-3 text-[12px] text-hfi-t3">
             <input type="checkbox" aria-label="Select all shown" checked={allPicked} onChange={toggleAll} className="h-[18px] w-[18px] accent-hfi-ink" />
             <span>Place</span>
             <span>Why it&apos;s here</span>
@@ -135,7 +135,7 @@ export function ReviewQueue({ rows }: { rows: ReviewRow[] }) {
             return (
               <div
                 key={r.id}
-                className={`grid grid-cols-[40px_minmax(0,2.2fr)_minmax(0,1.6fr)_150px_150px_56px] items-center gap-4 border-t border-hfi-divider px-5 py-3.5 first:border-t-0 ${on ? "bg-[#F6F6F5] shadow-[inset_3px_0_0_#0F0F0F]" : ""}`}
+                className={`grid grid-cols-[40px_minmax(0,2.2fr)_minmax(0,1.6fr)_150px_210px_56px] items-center gap-4 border-t border-hfi-divider px-5 py-3.5 first:border-t-0 ${on ? "bg-[#F6F6F5] shadow-[inset_3px_0_0_#0F0F0F]" : ""}`}
               >
                 <input type="checkbox" checked={on} onChange={() => toggle(r.id)} aria-label={`Select ${r.name}`} className="h-[18px] w-[18px] accent-hfi-ink" />
                 <div className="flex min-w-0 flex-col gap-0.5">
@@ -199,6 +199,57 @@ export function ReviewQueue({ rows }: { rows: ReviewRow[] }) {
           })}
           {!visible.length && <p className="px-5 py-6 text-hfi-t2">Nothing matches that.</p>}
         </div>
+      </div>
+
+      {/* Phone: one card per place */}
+      <div className="flex flex-col gap-2.5 md:hidden">
+        {visible.map((r) => {
+          const on = picked.has(r.id);
+          return (
+            <div key={r.id} className={`flex gap-3 rounded-xl border bg-white p-3.5 ${on ? "border-hfi-ink" : "border-hfi-hair"}`}>
+              <input type="checkbox" checked={on} onChange={() => toggle(r.id)} aria-label={`Select ${r.name}`} className="mt-0.5 h-5 w-5 shrink-0 accent-hfi-ink" />
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-[15px] font-semibold">{r.name}</span>
+                <span className="text-[13px] text-hfi-t2">{r.meta}</span>
+                {r.partial && <span className="text-[12.5px] text-hfi-t2">Partly halal: {r.partial}</span>}
+                <span className="text-[12.5px] text-hfi-t3">{r.source}</span>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  {r.dots.map((d) => (
+                    <DotIcon key={d.key} k={d.key} state={d.state} label={d.label} />
+                  ))}
+                  <span className="ml-1 text-[12px] tabular-nums text-hfi-t2">
+                    {r.score}/{r.dots.length}
+                  </span>
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  {([[false, "No alcohol"], [true, "Serves alcohol"]] as const).map(([v, label]) => (
+                    <button
+                      key={label}
+                      type="button"
+                      disabled={busy}
+                      aria-pressed={r.alcohol === v}
+                      onClick={() => pickAlcohol(r.id, r.alcohol === v ? null : v)}
+                      className={`h-8 rounded-full border px-3 text-[12.5px] ${r.alcohol === v ? "border-hfi-ink bg-hfi-ink font-semibold text-white" : "border-hfi-hair bg-white text-hfi-t2"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                  {r.placeId && (
+                    <a
+                      href={`https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(r.placeId)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-auto text-[13px] text-hfi-link"
+                    >
+                      Map ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {!visible.length && <p className="px-1 py-4 text-hfi-t2">Nothing matches that.</p>}
       </div>
 
       {picked.size > 0 && (

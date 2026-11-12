@@ -8,7 +8,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const ACCESS = "hfi_admin_at";
 const REFRESH = "hfi_admin_rt";
-const OPEN = ["/admin/login", "/admin/callback", "/admin/logout"];
+const OPEN = ["/admin/login", "/admin/logout"];
 const cookie = { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/admin" };
 
 function expiresSoon(jwt: string | undefined): boolean {
