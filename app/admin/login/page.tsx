@@ -49,7 +49,7 @@ export default function LoginPage({ searchParams }: { searchParams: { error?: st
           <button type="submit" className="mt-1 h-11 rounded-full bg-hfi-orn text-[15px] font-semibold text-white">
             Sign in
           </button>
-          <p className="text-[12.5px] text-hfi-t3">You stay signed in on this device for 30 days.</p>
+          <p className="text-[12.5px] text-hfi-t3">You only need to do this once on each device.</p>
         </form>
       </div>
     </div>

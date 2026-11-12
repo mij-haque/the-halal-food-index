@@ -64,7 +64,7 @@ export function anonClient(): SupabaseClient {
 export function setSessionCookies(accessToken: string, refreshToken: string) {
   const jar = cookies();
   jar.set(ACCESS_COOKIE, accessToken, { ...cookieBase, maxAge: 60 * 60 });
-  jar.set(REFRESH_COOKIE, refreshToken, { ...cookieBase, maxAge: 60 * 60 * 24 * 30 });
+  jar.set(REFRESH_COOKIE, refreshToken, { ...cookieBase, maxAge: 60 * 60 * 24 * 365 });
 }
 
 export function clearSessionCookies() {

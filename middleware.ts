@@ -57,7 +57,7 @@ export async function middleware(req: NextRequest) {
     const next = NextResponse.next({ request: { headers: req.headers } });
     next.headers.set("X-Robots-Tag", "noindex, nofollow");
     next.cookies.set(ACCESS, s.access_token, { ...cookie, maxAge: 60 * 60 });
-    next.cookies.set(REFRESH, s.refresh_token, { ...cookie, maxAge: 60 * 60 * 24 * 30 });
+    next.cookies.set(REFRESH, s.refresh_token, { ...cookie, maxAge: 60 * 60 * 24 * 365 });
     return next;
   } catch {
     return toLogin();
