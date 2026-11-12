@@ -28,13 +28,13 @@ Stack: Next.js 14 App Router, TypeScript, Tailwind, Supabase (Postgres 17 + Post
   owner's sign-off. Only published venues appear anywhere on the site.
 - Not in the data yet: photos, map, price. Pages show honest placeholders or leave those
   parts out. Filters exist only for facets with data.
-- **Google Maps facts** (opening hours, star rating, review count) come from Apify's Google
-  Maps Scraper via the `maps-refresh` Edge Function (`supabase/functions/maps-refresh/`),
-  run daily by pg_cron. They live in `external_place_cache` (30-day expiry, refreshed
+- **Google Maps facts** (opening hours, star rating, review count) come from Google's Places
+  API (New) via the `maps-refresh` Edge Function (`supabase/functions/maps-refresh/`),
+  run daily by pg_cron (moved off Apify 12 Nov 2026; Apify's free credit is kept for scraping jobs). They live in `external_place_cache` (30-day expiry, refreshed
   before it lapses) and the site reads them through `venue_place_facts()`. If that call
   fails the site still works, just without hours and ratings. List cards show the rating
   and an open/closed pill worked out in the browser (UK time, `lib/hours.ts`).
-  `APIFY_TOKEN` is a Supabase Edge Function secret set by the owner; never ask for it.
+  `GOOGLE_PLACES_KEY` and `APIFY_TOKEN` are Supabase Edge Function secrets set by the owner; never ask for them.
 - **Certification is not part of the product** (decision 3 Nov 2026, see
   `docs/decisions-update-no-certification.md`). Ignore the certification and "certificate seen"
   parts of the venue and chain mockups.

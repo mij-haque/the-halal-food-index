@@ -1,27 +1,38 @@
 // maps-refresh
 //
 // Keeps Google Maps facts (opening hours, star rating, review count) fresh for
-// live and waiting venues, using Apify's Google Maps Scraper. Facts go into
-// external_place_cache (separate from our own data, 30-day expiry), and empty
-// venue fields (phone, website, address, pin, place ID) are filled, never
-// overwritten. Venue status is never changed here.
+// live and waiting venues, using Google's Places API (New). Facts go into
+// external_place_cache (separate from our own data, 30-day expiry, which is
+// within Google's caching terms), and empty venue fields (phone, website,
+// address, pin, place ID) are filled, never overwritten. Venue status is never
+// changed here.
 //
-// Called once a day by pg_cron (job "maps-refresh-daily"). Each call:
-//   1. ingests any Apify run that has finished,
-//   2. starts the next run if any venue is due (missing or expiring facts).
-// Safe to call again at any time: nothing is fetched twice within 7 days.
+// Called once a day by pg_cron (job "maps-refresh-daily"). Each call refreshes
+// up to BATCH due venues straight away (no background run to wait for).
+// Venues with a Google place ID get a Place Details lookup; the rest get a
+// Text Search for "name, address, postcode" and are only accepted when the
+// names match. Safe to call again: nothing is fetched twice within 7 days.
+//
+// Cost: Google gives a free monthly allowance per SKU. One lookup per venue
+// per month stays inside it at our size. A Google Cloud budget alert is set.
+//
+// Moved from Apify to the Places API on 12 Nov 2026 (Apify's free credit is
+// kept for the Instagram scan).
 //
 // Auth: header x-refresh-key must match the Vault secret "maps_refresh_key".
-// Secrets: APIFY_TOKEN (set by the owner in the Supabase dashboard).
+// Secrets: GOOGLE_PLACES_KEY (set by the owner in the Supabase dashboard).
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
-const ACTOR = "compass~crawler-google-places";
-const APIFY = "https://api.apify.com/v2";
-const BATCH = 60; // venues per Apify run
+const PLACES = "https://places.googleapis.com/v1";
+const BATCH = 60; // venues per call
+const PARALLEL = 6;
 const CACHE_DAYS = 30;
-const MAX_CHARGE_USD = 1; // hard spending cap per run
-const DETAIL_PAGE = false; // opening hours come with the basic place data
+const FIELDS = [
+  "id", "displayName", "formattedAddress", "addressComponents", "location",
+  "nationalPhoneNumber", "websiteUri", "regularOpeningHours", "rating",
+  "userRatingCount", "businessStatus", "googleMapsUri", "types",
+];
 
 const db = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -29,121 +40,77 @@ const db = createClient(
   { auth: { persistSession: false } },
 );
 
-type Requested = { venue_id: string; place_id: string | null; search: string };
-type Run = {
-  id: string;
-  kind: "place_ids" | "search";
-  apify_run_id: string;
-  dataset_id: string | null;
-  requested: Requested[];
-};
+type Due = { venue_id: string; place_id: string | null; search: string };
 // deno-lint-ignore no-explicit-any
-type Item = Record<string, any>;
+type Place = Record<string, any>;
 
 const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
+  new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-async function apify(path: string, init: RequestInit = {}) {
-  const res = await fetch(`${APIFY}${path}`, {
+async function google(path: string, init: RequestInit, mask: string): Promise<Place | null> {
+  const res = await fetch(`${PLACES}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${Deno.env.get("APIFY_TOKEN")}`,
+      "X-Goog-Api-Key": Deno.env.get("GOOGLE_PLACES_KEY")!,
+      "X-Goog-FieldMask": mask,
     },
   });
   const text = await res.text();
-  if (!res.ok) {
-    throw new Error(`Apify ${path.split("?")[0]} ${res.status}: ${text.slice(0, 300)}`);
-  }
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Places ${path.split("?")[0]} ${res.status}: ${text.slice(0, 300)}`);
   return text ? JSON.parse(text) : null;
 }
 
-/* ── opening hours: Google's text to minutes after midnight ──
- * {mon: [[660, 1380]], tue: [], ...}  [] = closed that day, missing = unknown.
+const details = (placeId: string) =>
+  google(`/places/${encodeURIComponent(placeId)}?languageCode=en&regionCode=GB`, { method: "GET" }, FIELDS.join(","));
+
+async function search(text: string): Promise<Place | null> {
+  const body = {
+    textQuery: text,
+    languageCode: "en",
+    regionCode: "GB",
+    pageSize: 1,
+    // Greater Manchester, roughly; a bias, not a hard limit.
+    locationBias: { rectangle: { low: { latitude: 53.33, longitude: -2.73 }, high: { latitude: 53.69, longitude: -1.91 } } },
+  };
+  const res = await google("/places:searchText", { method: "POST", body: JSON.stringify(body) }, FIELDS.map((f) => `places.${f}`).join(","));
+  return res?.places?.[0] ?? null;
+}
+
+/* ── opening hours: Google's periods to minutes after midnight ──
+ * {mon: [[660, 1380]], tue: [], ...}  [] = closed that day.
  * A range that ends after midnight runs past 1440 (e.g. 5pm to 2am = [1020, 1560]).
  */
+const DAY = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
-const DAYS: Record<string, string> = {
-  monday: "mon", tuesday: "tue", wednesday: "wed", thursday: "thu",
-  friday: "fri", saturday: "sat", sunday: "sun",
-};
-
-function meridiem(s: string | undefined): "am" | "pm" | null {
-  if (!s) return null;
-  return s.startsWith("a") ? "am" : "pm";
-}
-
-function minutes(t: string, mer: "am" | "pm" | null): number | null {
-  const m = t.match(/^(\d{1,2})(?::(\d{2}))?$/);
-  if (!m) return null;
-  let h = Number(m[1]);
-  const min = Number(m[2] ?? 0);
-  if (h > 24 || min > 59) return null;
-  if (mer) {
-    if (h > 12) return null;
-    h = h % 12 + (mer === "pm" ? 12 : 0);
+function normaliseHours(h: Place | undefined): Record<string, number[][]> | null {
+  const periods: Place[] | undefined = h?.periods;
+  if (!Array.isArray(periods) || !periods.length) return null;
+  const week: Record<string, number[][]> = { mon: [], tue: [], wed: [], thu: [], fri: [], sat: [], sun: [] };
+  // Open 24 hours: a single period that opens and never closes.
+  if (periods.length === 1 && !periods[0].close) {
+    for (const d of DAY) week[d] = [[0, 1440]];
+    return week;
   }
-  return h * 60 + min;
-}
-
-export function parseRanges(raw: string): number[][] | null {
-  const s = String(raw)
-    .toLowerCase()
-    .replace(/[\u202f\u00a0\u2009]/g, " ")
-    .replace(/\s*[\u2013\u2014]\s*/g, " to ")
-    .replace(/\./g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!s) return null;
-  if (s.includes("closed")) return [];
-  if (s.includes("24 hours")) return [[0, 1440]];
-  const out: number[][] = [];
-  for (const part of s.split(/[,;]/)) {
-    const m = part.trim().match(
-      /^(\d{1,2}(?::\d{2})?)\s*(am|pm)?\s*(?:to|-)\s*(\d{1,2}(?::\d{2})?)\s*(am|pm)?$/,
-    );
-    if (!m) return null; // unknown format: keep the raw text only
-    const endMer = meridiem(m[4]);
-    const startMer = meridiem(m[2]) ?? endMer;
-    let start = minutes(m[1], startMer);
-    let end = minutes(m[3], endMer);
-    if (start === null || end === null) return null;
-    // "11 to 2 PM" means 11am, not 11pm
-    if (!m[2] && endMer === "pm" && start >= end && start - 720 >= 0) start -= 720;
-    if (end <= start) end += 1440;
-    out.push([start, end]);
+  for (const p of periods) {
+    if (!p.open || !p.close) continue;
+    const start = (p.open.hour ?? 0) * 60 + (p.open.minute ?? 0);
+    const span = ((p.close.day - p.open.day + 7) % 7) * 1440;
+    const end = span + (p.close.hour ?? 0) * 60 + (p.close.minute ?? 0);
+    week[DAY[p.open.day]].push([start, end]);
   }
-  return out;
+  for (const d of DAY) week[d].sort((a, b) => a[0] - b[0]);
+  return week;
 }
 
-function normaliseHours(list: unknown): Record<string, number[][]> | null {
-  if (!Array.isArray(list) || list.length === 0) return null;
-  const week: Record<string, number[][]> = {};
-  for (const row of list as Array<{ day?: string; hours?: string }>) {
-    const day = DAYS[String(row?.day ?? "").toLowerCase().trim()];
-    if (!day || row?.hours == null) continue;
-    const ranges = parseRanges(row.hours);
-    if (ranges) week[day] = ranges;
-  }
-  return Object.keys(week).length ? week : null;
-}
-
-/* ── name check for search results (no place ID to match on) ── */
-
+/* ── name check for text-search results (no place ID to match on) ── */
 const STOP = new Set(["the", "and", "restaurant", "cafe", "café", "manchester", "ltd", "uk"]);
 function words(s: string): Set<string> {
   return new Set(
-    String(s ?? "")
-      .normalize("NFKD")
-      .replace(/\p{M}/gu, "")
-      .toLowerCase()
-      .replace(/['\u2019]/g, "")
-      .replace(/[^\p{L}\p{N} ]/gu, " ")
-      .split(/\s+/)
-      .filter((w) => w.length > 1 && !STOP.has(w)),
+    String(s ?? "").normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase()
+      .replace(/['’]/g, "").replace(/[^\p{L}\p{N} ]/gu, " ")
+      .split(/\s+/).filter((w) => w.length > 1 && !STOP.has(w)),
   );
 }
 function sameName(a: string, b: string): boolean {
@@ -153,106 +120,94 @@ function sameName(a: string, b: string): boolean {
   for (const w of A) if (B.has(w)) shared++;
   return shared / Math.min(A.size, B.size) >= 0.5;
 }
-const key = (s: string) => String(s ?? "").toLowerCase().replace(/\s+/g, " ").trim();
 
-/* ── ingest a finished run ── */
+const part = (p: Place, type: string) =>
+  (p.addressComponents as Place[] | undefined)?.find((c) => c.types?.includes(type))?.longText as string | undefined;
 
-async function ingest(run: Run) {
-  const items: Item[] = await apify(`/datasets/${run.dataset_id}/items?clean=true&format=json`);
-  const requested = run.requested;
-  const byPlace = new Map(requested.filter((r) => r.place_id).map((r) => [r.place_id!, r]));
-  const bySearch = new Map(requested.map((r) => [key(r.search), r]));
-  const ids = requested.map((r) => r.venue_id);
+/* ── refresh one batch ── */
 
+async function refresh(due: Due[]) {
+  const ids = due.map((d) => d.venue_id);
   const [{ data: caches, error: cErr }, { data: venues, error: vErr }] = await Promise.all([
     db.from("external_place_cache").select("id, venue_id, provider, external_id, payload").in("venue_id", ids),
-    db.from("venues")
-      .select("id, name, phone, website, address_line, postcode, location, google_place_id")
-      .in("id", ids),
+    db.from("venues").select("id, name, phone, website, address_line, postcode, location, google_place_id").in("id", ids),
   ]);
   if (cErr) throw cErr;
   if (vErr) throw vErr;
 
   const now = new Date();
   const expires = new Date(now.getTime() + CACHE_DAYS * 864e5).toISOString();
-  const done = new Set<string>();
-  const unmatched: string[] = [];
-  const failed: string[] = [];
-  const closed: string[] = [];
-  let saved = 0, withHours = 0, filled = 0;
+  const unmatched: string[] = [], notFound: string[] = [], failed: string[] = [], closed: string[] = [];
+  let saved = 0, withHours = 0, filled = 0, byId = 0, bySearch = 0;
 
-  for (const it of items ?? []) {
-    let req = it.placeId ? byPlace.get(it.placeId) : undefined;
-    if (!req && it.searchString) req = bySearch.get(key(it.searchString));
-    if (!req || done.has(req.venue_id)) {
-      if (!req) unmatched.push(String(it.title ?? it.placeId ?? "?"));
-      continue;
+  async function one(d: Due) {
+    const venue = venues!.find((v) => v.id === d.venue_id);
+    if (!venue) return;
+    let p: Place | null = null;
+    let viaSearch = false;
+    try {
+      if (d.place_id) { p = await details(d.place_id); byId++; }
+      if (!p) { p = await search(d.search); bySearch++; viaSearch = true; }
+    } catch (e) {
+      failed.push(`${venue.name}: ${String((e as Error).message ?? e)}`);
+      return;
     }
-    done.add(req.venue_id);
-    const venue = venues!.find((v) => v.id === req!.venue_id);
-    if (!venue) continue;
-    if (run.kind === "search" && !sameName(venue.name, it.title)) {
-      unmatched.push(`${venue.name} (Maps found "${it.title}")`);
-      continue;
+    if (!p) { notFound.push(venue.name); return; }
+    const title = p.displayName?.text ?? "";
+    if (viaSearch && !sameName(venue.name, title)) {
+      unmatched.push(`${venue.name} (Maps found "${title}")`);
+      return;
     }
 
-    const placeId: string | null = it.placeId ?? req.place_id;
-    const hours = normaliseHours(it.openingHours);
+    const hours = normaliseHours(p.regularOpeningHours);
     if (hours) withHours++;
-    if (it.permanentlyClosed || it.temporarilyClosed) closed.push(venue.name);
+    const permanentlyClosed = p.businessStatus === "CLOSED_PERMANENTLY";
+    const temporarilyClosed = p.businessStatus === "CLOSED_TEMPORARILY";
+    if (permanentlyClosed || temporarilyClosed) closed.push(venue.name);
 
     const facts: Record<string, unknown> = {
       hours,
-      opening_hours_raw: it.openingHours ?? null,
-      permanently_closed: !!it.permanentlyClosed,
-      temporarily_closed: !!it.temporarilyClosed,
-      maps_url: it.url ?? null,
+      opening_hours_raw: p.regularOpeningHours?.weekdayDescriptions ?? null,
+      permanently_closed: permanentlyClosed,
+      temporarily_closed: temporarilyClosed,
+      maps_url: p.googleMapsUri ?? null,
       hours_checked_at: now.toISOString(),
-      maps_source: "apify_google_maps",
+      maps_source: "google_places_api",
     };
-    if (typeof it.totalScore === "number") facts.rating = it.totalScore;
-    if (typeof it.reviewsCount === "number") facts.review_count = it.reviewsCount;
-    if (Array.isArray(it.categories) && it.categories.length) facts.categories = it.categories;
+    if (typeof p.rating === "number") facts.rating = p.rating;
+    if (typeof p.userRatingCount === "number") facts.review_count = p.userRatingCount;
+    if (Array.isArray(p.types) && p.types.length) facts.place_types = p.types;
 
     const row = caches!.find((c) => c.venue_id === venue.id && c.provider === "google") ??
       caches!.find((c) => c.venue_id === venue.id);
     const payload = { ...(row?.payload ?? {}), ...facts };
     delete payload.no_google_listing;
     delete payload.no_google_listing_note;
+    const placeId: string | null = p.id ?? d.place_id;
 
-    const write = row
-      ? db.from("external_place_cache").update({
-        provider: "google",
-        external_id: placeId ?? row.external_id,
-        payload,
-        fetched_at: now.toISOString(),
-        expires_at: expires,
+    const { error: wErr } = row
+      ? await db.from("external_place_cache").update({
+        provider: "google", external_id: placeId ?? row.external_id, payload,
+        fetched_at: now.toISOString(), expires_at: expires,
       }).eq("id", row.id)
-      : db.from("external_place_cache").insert({
-        venue_id: venue.id,
-        provider: "google",
-        external_id: placeId ?? venue.id,
-        payload,
-        fetched_at: now.toISOString(),
-        expires_at: expires,
+      : await db.from("external_place_cache").insert({
+        venue_id: venue.id, provider: "google", external_id: placeId ?? venue.id, payload,
+        fetched_at: now.toISOString(), expires_at: expires,
       });
-    const { error: wErr } = await write;
-    if (wErr) {
-      failed.push(`${venue.name}: ${wErr.message}`);
-      continue;
-    }
+    if (wErr) { failed.push(`${venue.name}: ${wErr.message}`); return; }
     saved++;
 
     // Fill gaps on the venue itself. Never overwrite what we already hold.
     const patch: Record<string, unknown> = {};
     if (!venue.google_place_id && placeId) patch.google_place_id = placeId;
-    if (!venue.phone && (it.phone || it.phoneUnformatted)) patch.phone = it.phone ?? it.phoneUnformatted;
-    if (!venue.website && it.website) patch.website = it.website;
-    if (!venue.address_line && (it.street || it.address)) {
-      patch.address_line = it.street ? [it.street, it.city].filter(Boolean).join(", ") : it.address;
+    if (!venue.phone && p.nationalPhoneNumber) patch.phone = p.nationalPhoneNumber;
+    if (!venue.website && p.websiteUri) patch.website = p.websiteUri;
+    if (!venue.address_line) {
+      const street = [part(p, "street_number"), part(p, "route")].filter(Boolean).join(" ");
+      if (street) patch.address_line = street;
     }
-    if (!venue.postcode && it.postalCode) patch.postcode = it.postalCode;
-    const lat = it.location?.lat, lng = it.location?.lng;
+    if (!venue.postcode && part(p, "postal_code")) patch.postcode = part(p, "postal_code");
+    const lat = p.location?.latitude, lng = p.location?.longitude;
     if (!venue.location && typeof lat === "number" && typeof lng === "number") {
       patch.location = `SRID=4326;POINT(${lng} ${lat})`;
     }
@@ -263,101 +218,45 @@ async function ingest(run: Run) {
     }
   }
 
-  const notFound = requested
-    .filter((r) => !done.has(r.venue_id))
-    .map((r) => r.search.split(",")[0]);
+  for (let i = 0; i < due.length; i += PARALLEL) await Promise.all(due.slice(i, i + PARALLEL).map(one));
+
   const result = {
-    items: items?.length ?? 0,
-    saved,
-    with_hours: withHours,
-    venues_filled: filled,
-    not_found: notFound,
-    unmatched,
-    closed_on_maps: closed,
-    failed,
+    requested: due.length, by_place_id: byId, by_search: bySearch, saved, with_hours: withHours,
+    venues_filled: filled, not_found: notFound, unmatched, closed_on_maps: closed, failed,
   };
-  await db.from("maps_refresh_runs")
-    .update({ status: "ingested", finished_at: now.toISOString(), result })
-    .eq("id", run.id);
-  return result;
-}
-
-/* ── start the next run ── */
-
-async function start(due: Requested[]) {
-  const withId = due.filter((d) => d.place_id);
-  const kind: Run["kind"] = withId.length ? "place_ids" : "search";
-  const batch = withId.length ? withId : due;
-  const input = {
-    language: "en",
-    maxReviews: 0,
-    maxImages: 0,
-    scrapePlaceDetailPage: DETAIL_PAGE,
-    maxCrawledPlacesPerSearch: 1,
-    ...(kind === "place_ids"
-      ? { placeIds: batch.map((b) => b.place_id) }
-      : { searchStringsArray: batch.map((b) => b.search) }),
-  };
-  const res = await apify(
-    `/acts/${ACTOR}/runs?maxItems=${batch.length}&maxTotalChargeUsd=${MAX_CHARGE_USD}`,
-    { method: "POST", body: JSON.stringify(input) },
-  );
-  const run = res?.data;
-  if (!run?.id) throw new Error("Apify did not return a run id");
-  const { error } = await db.from("maps_refresh_runs").insert({
-    kind,
-    apify_run_id: run.id,
-    dataset_id: run.defaultDatasetId ?? null,
-    requested: batch,
+  // Logged like the old Apify runs so maps_due_venues skips these for 7 days.
+  await db.from("maps_refresh_runs").insert({
+    kind: due.some((d) => d.place_id) ? "place_ids" : "search",
+    apify_run_id: `places-api-${now.toISOString()}`,
+    dataset_id: null,
+    requested: due,
+    status: "ingested",
+    finished_at: new Date().toISOString(),
+    result,
   });
-  if (error) throw error;
-  return { run: run.id, kind, venues: batch.length };
+  return result;
 }
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
-  const { data: ok } = await db.rpc("maps_refresh_key_ok", {
-    p_key: req.headers.get("x-refresh-key") ?? "",
-  });
+  const { data: ok } = await db.rpc("maps_refresh_key_ok", { p_key: req.headers.get("x-refresh-key") ?? "" });
   if (ok !== true) return json({ error: "forbidden" }, 403);
-  if (!Deno.env.get("APIFY_TOKEN")) {
-    return json({ ok: false, waiting: "APIFY_TOKEN secret is not set yet" });
-  }
+  if (!Deno.env.get("GOOGLE_PLACES_KEY")) return json({ ok: false, waiting: "GOOGLE_PLACES_KEY secret is not set yet" });
 
   try {
-    const report: Record<string, unknown> = {};
-    const { data: open, error } = await db.from("maps_refresh_runs")
-      .select("id, kind, apify_run_id, dataset_id, requested")
-      .eq("status", "running")
-      .order("started_at");
-    if (error) throw error;
-
-    for (const run of (open ?? []) as Run[]) {
-      const info = await apify(`/actor-runs/${run.apify_run_id}`);
-      const status = info?.data?.status;
-      if (status === "SUCCEEDED") {
-        report[run.apify_run_id] = await ingest(run);
-      } else if (["FAILED", "ABORTED", "TIMED-OUT", "TIMED_OUT"].includes(status)) {
-        await db.from("maps_refresh_runs").update({
-          status: "failed",
-          finished_at: new Date().toISOString(),
-          result: { apify_status: status },
-        }).eq("id", run.id);
-        report[run.apify_run_id] = { failed: status };
-      } else {
-        return json({ ok: true, ...report, waiting_on: run.apify_run_id, status });
-      }
-    }
+    // Older Apify runs still marked running can't be collected any more.
+    await db.from("maps_refresh_runs")
+      .update({ status: "failed", finished_at: new Date().toISOString(), result: { note: "left over from Apify; moved to Places API" } })
+      .eq("status", "running");
 
     const { data: due, error: dErr } = await db.rpc("maps_due_venues", { p_limit: BATCH });
     if (dErr) throw dErr;
-    if (!due?.length) return json({ ok: true, ...report, started: null });
-
-    const started = await start(
+    if (!due?.length) return json({ ok: true, refreshed: null });
+    const result = await refresh(
       (due as Array<{ venue_id: string; place_id: string | null; search_text: string }>)
         .map((d) => ({ venue_id: d.venue_id, place_id: d.place_id, search: d.search_text })),
     );
-    return json({ ok: true, ...report, started });
+    return json({ ok: true, refreshed: result });
   } catch (e) {
     return json({ ok: false, error: String((e as Error)?.message ?? e) }, 500);
   }
