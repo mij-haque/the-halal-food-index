@@ -72,7 +72,12 @@ const META_MAX = 158;
 /** Answer line plus as many whole write-up sentences as fit, so the snippet
  * never stops mid-sentence. Only a single over-long sentence gets cut. */
 function metaDescription(v: Venue): string {
-  const sentences = [quotableAnswer(v), summaryText(v)]
+  // Google's rating, in words only (never in structured data). Matches "<venue> reviews" searches.
+  const rating =
+    v.rating != null && v.reviewCount
+      ? `Rated ${v.rating.toFixed(1)} from ${v.reviewCount.toLocaleString("en-GB")} Google reviews.`
+      : null;
+  const sentences = [quotableAnswer(v), rating, summaryText(v)]
     .filter((s): s is string => Boolean(s))
     .join(" ")
     .split(/(?<=[.!?])\s+/)
