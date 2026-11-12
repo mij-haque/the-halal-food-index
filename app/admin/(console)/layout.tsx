@@ -13,7 +13,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   const [jobs, counts] = await Promise.all([getJobs(admin.db), getCounts(admin.db)]);
 
   return (
-    <div className="flex min-h-screen flex-wrap">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <nav aria-label="Admin" className="flex w-full flex-col gap-4 bg-[#111312] px-4 py-4 text-[#EDEDEA] md:w-[248px] md:shrink-0 md:gap-7 md:py-6">
         <div className="flex items-center gap-3 px-2">
           <Seal />
