@@ -1,27 +1,45 @@
-/* Line icons for the admin's readiness dots. Stroke takes the state colour. */
+/* Readiness badges for the admin: a filled circle per check, coloured by state. */
 
 export const DOT_PATHS: Record<string, string> = {
-  halal: "M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z M9 12l2 2 4-4",
-  google: "M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z M12 8.5v3",
-  area: "M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14",
-  food: "M7 3v8 M5 3v4a2 2 0 0 0 4 0V3 M7 11v10 M17 3c-2 0-3 2-3 5s1 4 3 4v9",
-  hours: "M12 7v5l3 2 M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z",
-  rating: "M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z",
-  alcohol: "M7 3h10l-1 7a4 4 0 0 1-8 0z M12 14v7 M8 21h8",
+  google: "M12 21s-6.5-5.6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z M12 12.2a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8z",
+  area: "M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z M9 4v13.5 M15 6.5V20",
+  food: "M7 3v8 M4.5 3v4.5a2.5 2.5 0 0 0 5 0V3 M7 11v10 M17.5 3c-2.2 0-3.5 2.4-3.5 5.5s1.3 4.5 3.5 4.5v8",
+  hours: "M12 7.5V12l3 2 M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z",
+  rating: "M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z",
+  alcohol: "M7 3h10l-1 7a4 4 0 0 1-8 0z M12 14v7 M8.5 21h7",
   contact: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
-  writeup: "M4 6h16 M4 10h16 M4 14h10 M4 18h7",
+  writeup: "M5 6h14 M5 10h14 M5 14h9 M5 18h6",
   live: "M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z M3 12h18 M12 3c3 3 3 15 0 18 M12 3c-3 3-3 15 0 18",
 };
 
-export const STATE_COLOUR = { done: "#0B8F5A", missing: "#B06005", problem: "#C02929" } as const;
-export const STATE_WORD = { done: "done", missing: "missing", problem: "problem" } as const;
+const STYLE = {
+  done: { bg: "#0B8F5A", fg: "#FFFFFF", ring: "#0B8F5A" },
+  missing: { bg: "#FBF0E0", fg: "#B06005", ring: "#E8C99A" },
+  problem: { bg: "#C02929", fg: "#FFFFFF", ring: "#C02929" },
+} as const;
+export const STATE_COLOUR = { done: STYLE.done.bg, missing: STYLE.missing.fg, problem: STYLE.problem.bg } as const;
+const WORD = { done: "done", missing: "missing", problem: "problem" } as const;
 
-export function DotIcon({ k, state, label, size = 15 }: { k: string; state: keyof typeof STATE_COLOUR; label: string; size?: number }) {
+export function DotIcon({ k, state, label, size = 24 }: { k: string; state: keyof typeof STYLE; label: string; size?: number }) {
+  const s = STYLE[state];
   return (
-    <span title={`${label}: ${STATE_WORD[state]}`} className="inline-flex">
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={STATE_COLOUR[state]} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d={DOT_PATHS[k]} />
-      </svg>
+    <span
+      title={`${label}: ${WORD[state]}`}
+      className="inline-flex shrink-0 items-center justify-center rounded-full"
+      style={{ width: size, height: size, background: s.bg, boxShadow: `inset 0 0 0 1px ${s.ring}` }}
+    >
+      {k === "halal" ? (
+        // The word halal (حلال), as on halal signage.
+        <svg width={size * 0.82} height={size * 0.82} viewBox="0 0 24 24" aria-hidden="true">
+          <text x="12" y="15.6" textAnchor="middle" fontSize="11" fontWeight="700" fill={s.fg} style={{ fontFamily: "'Noto Naskh Arabic','Geeza Pro','Arial',sans-serif" }}>
+            حلال
+          </text>
+        </svg>
+      ) : (
+        <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none" stroke={s.fg} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d={DOT_PATHS[k]} />
+        </svg>
+      )}
     </span>
   );
 }
