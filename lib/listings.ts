@@ -190,6 +190,28 @@ export const COMBO_PAGES: ComboPage[] = [
     intro:
       "Most of Oldham's brunch cafes are out towards Chadderton. Aura Cafe is on Victoria Street, The Baytree Cafe on Middleton Road and Bread & Butter on Chadderton Way, while Wonderlust Bistro sits on Library Lane in town. Bittersweet, in the Old Town Hall, does breakfasts as well as waffles and desserts. Khau Galli in Royton serves brunch too, and it does serve alcohol.",
   },
+  {
+    slug: "halal-grill-oldham",
+    areaSlug: "oldham",
+    cuisineSlug: "grill",
+    heading: "Halal Grills & Kebabs in Oldham",
+    crumb: "Grills & Kebabs",
+    chip: "Halal grills in Oldham",
+    description: (n) => `${n} halal grills and kebab houses in Oldham and Royton, from town centre kebab shops to sit-down steak and sizzler restaurants.`,
+    intro:
+      "Oldham's grills are spread right across the borough. In town, Charcoal Grill on George Street does seekh kebabs and shashlik, with BBQ'd on Union Street, Cafe East on Yorkshire Street and German Doner Kebab on High Street close by. Ashton Road has Afghan Kebab House and Friends Restaurant, and Featherstall Road has Donner HQ and Piri Desi. For a sit-down meal, Gourmet Steak & Grill on Ellen Street is known for its sizzlers, Grelhados is on Lees Road and Zaraks Grill Lounge is at Bottom o' th' Moor. Bank Grill is out in Royton.",
+  },
+  {
+    slug: "halal-brunch-bolton",
+    areaSlug: "bolton",
+    cuisineSlug: "brunch",
+    heading: "Halal Breakfast & Brunch in Bolton",
+    crumb: "Breakfast & Brunch",
+    chip: "Halal brunch in Bolton",
+    description: (n) => `${n} places for halal breakfast and brunch in Bolton, with opening hours and what's on offer.`,
+    intro:
+      "Bolton's brunch spots sit mostly along two roads. St Helens Road has Cafe Chico and Desi Brunch a few doors apart, and Halliwell Road has RF Cafe & Patisserie and Tasty Bites. In the town centre, Kohi Coffee House is on Horsfield Street, Mi Chaii is on Derby Street, and House Of Chai on Bradshawgate serves breakfast and brunch alongside chai and desserts.",
+  },
 ];
 
 export function comboVenues(page: ComboPage, all: ListingVenue[]): ListingVenue[] {
