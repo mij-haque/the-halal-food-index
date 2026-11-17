@@ -212,6 +212,61 @@ export const COMBO_PAGES: ComboPage[] = [
     intro:
       "Bolton's brunch spots sit mostly along two roads. St Helens Road has Cafe Chico and Desi Brunch a few doors apart, and Halliwell Road has RF Cafe & Patisserie and Tasty Bites. In the town centre, Kohi Coffee House is on Horsfield Street, Mi Chaii is on Derby Street, and House Of Chai on Bradshawgate serves breakfast and brunch alongside chai and desserts.",
   },
+  {
+    slug: "halal-desserts-oldham",
+    areaSlug: "oldham",
+    cuisineSlug: "desserts",
+    heading: "Halal Desserts in Oldham",
+    crumb: "Desserts",
+    chip: "Halal desserts in Oldham",
+    description: (n) => `${n} halal dessert shops, cafés and sweet centres in Oldham, from waffles and kunafa to mithai.`,
+    intro:
+      "Union Street is the centre of Oldham's dessert scene, with Frurt, Little Dessert Shop and Moonlight within a few doors of each other. Yorkshire Street has The Belgian Waffle Company, and Bittersweet sits in the Old Town Hall. Ashton Road covers the traditional side: Ambala for mithai and ladoo, Cake Box for egg-free cakes and Dessert Point further out. Mumtaz Chai on Featherstall Road North, Uncle's Tea Hut in Chadderton and Sweet Obsession on Manchester Street round out the list.",
+  },
+  {
+    slug: "halal-chicken-oldham",
+    areaSlug: "oldham",
+    cuisineSlug: "chicken",
+    heading: "Halal Chicken in Oldham",
+    crumb: "Chicken",
+    chip: "Halal chicken in Oldham",
+    description: (n) => `${n} halal fried chicken and peri peri spots in Oldham and Royton.`,
+    intro:
+      "Most of Oldham's chicken shops sit in the town centre. Union Street alone has Orlando's, Virginia and Georgia Fried Chicken, with Florida Fried Chicken on Yorkshire Street and HFC on George Street. Both Oldham branches of Nando's serve halal chicken, in the Old Town Hall and at Elk Mill, though both serve alcohol. Piri Desi is on Featherstall Road South, while Bank Grill and Loaded Cartel are out in Royton.",
+  },
+  {
+    slug: "halal-indian-oldham",
+    areaSlug: "oldham",
+    cuisineSlug: "indian",
+    heading: "Halal Indian Restaurants in Oldham",
+    crumb: "Indian",
+    chip: "Halal Indian in Oldham",
+    description: (n) => `${n} halal Indian restaurants in Oldham, Chadderton and Royton, from buffets to curry houses.`,
+    intro:
+      "From small curry houses to large sit-down venues, there is a wide spread of Indian restaurants around Oldham. The Palm in Chadderton runs a buffet of over 100 dishes, and Westwood East on Eleanor Street has an all-you-can-eat tandoori night every Wednesday. Indian Ocean has been on Featherstall Road North since 1993. Khau Galli in Royton is known for its private dining pods, and Blue Tiffin is on Higginshaw Lane. Grand Millon, Spice Grill and Afghan Kebab House complete the list.",
+  },
+  {
+    slug: "halal-burgers-oldham",
+    areaSlug: "oldham",
+    cuisineSlug: "burgers",
+    heading: "Halal Burgers in Oldham",
+    crumb: "Burgers",
+    chip: "Halal burgers in Oldham",
+    description: (n) => `${n} halal burger places in Oldham and Royton, from smash burgers to loaded fries.`,
+    intro:
+      "Burger spots in Oldham are split between the town centre and Featherstall Road. Havana Burgers & Shakes and Sani's are on Union Street, while Hustle Burger and Lucky's Diner sit on Featherstall Road North. Burgerize, known for smash burgers, is on Waddington Street, and Burg'Zilla is on Primrose Bank. Loaded Cartel in Royton is best known for its honey garlic loaded fries.",
+  },
+  {
+    slug: "halal-bengali-oldham",
+    areaSlug: "oldham",
+    cuisineSlug: "bengali",
+    heading: "Halal Bengali Restaurants in Oldham",
+    crumb: "Bengali",
+    chip: "Halal Bengali in Oldham",
+    description: (n) => `${n} halal Bengali restaurants in Oldham, most of them on Featherstall Road North.`,
+    intro:
+      "Featherstall Road North is the heart of Bengali food in Oldham. Kacchi Bari, named after its kacchi biryani, is at number 31, with Boithok Khana at 25, Grameen Khana at 67 and Bismillah Kitchen at 98. Old Dacca, one of the newer openings, is on Chadderton Way.",
+  },
 ];
 
 export function comboVenues(page: ComboPage, all: ListingVenue[]): ListingVenue[] {
