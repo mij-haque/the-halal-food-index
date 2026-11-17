@@ -33,16 +33,29 @@ export type ListingPageProps = {
   placeName?: string;
 };
 
+/*
+ * Search title for indexable list pages (decision 17 Nov 2026):
+ * "Best Halal Breakfast & Brunch in Manchester: 66 Places (Nov 2026)".
+ * Count and month update themselves, so the title never goes stale. The H1
+ * stays plain. Baseline CTR before this change: 0.6% at position 8 to 10.
+ */
+function hookTitle(title: string, path: string, count: number): string {
+  const base = path === urls.flagship() ? "Halal Restaurants in Manchester" : title;
+  const month = new Date().toLocaleString("en-GB", { month: "short", year: "numeric", timeZone: "Europe/London" });
+  return `Best ${base}: ${count} Places (${month})`;
+}
+
 export function listingMetadata(p: { path: string; title: string; description: string; count: number; alwaysIndex?: boolean }): Metadata {
   const url = absolute(p.path);
   const index = p.alwaysIndex || p.count >= MIN_LISTINGS_TO_INDEX;
+  const title = index ? hookTitle(p.title, p.path, p.count) : p.title;
   return {
-    title: p.title,
+    title: index ? { absolute: title } : title,
     description: p.description,
     alternates: { canonical: url },
     robots: index ? undefined : { index: false, follow: true },
-    openGraph: { type: "website", url, title: p.title, description: p.description, siteName: SITE_NAME, locale: "en_GB" },
-    twitter: { card: "summary", title: p.title, description: p.description },
+    openGraph: { type: "website", url, title, description: p.description, siteName: SITE_NAME, locale: "en_GB" },
+    twitter: { card: "summary", title, description: p.description },
     other: { "theme-color": "#0B6B45" },
   };
 }
@@ -80,8 +93,64 @@ function jsonLd(p: ListingPageProps) {
   ];
 }
 
+/*
+ * "Top 5" box (decision 17 Nov 2026): picked automatically with the same
+ * weighting as the "Top rated" sort in listing-explorer.tsx (keep the two in
+ * step). A place needs 50+ Google reviews to qualify, and the box only shows
+ * on pages with at least 8 listings.
+ */
+const TOP_PICKS = 5;
+const TOP_MIN_REVIEWS = 50;
+const TOP_MIN_LISTINGS = 8;
+const PRIOR_MEAN = 4.4;
+const PRIOR_WEIGHT = 100;
+function topPicks(venues: ListingVenue[]): ListingVenue[] {
+  if (venues.length < TOP_MIN_LISTINGS) return [];
+  const score = (v: ListingVenue) => {
+    const n = v.reviewCount ?? 0;
+    return (n * (v.rating ?? 0) + PRIOR_WEIGHT * PRIOR_MEAN) / (n + PRIOR_WEIGHT);
+  };
+  return venues
+    .filter((v) => v.rating != null && (v.reviewCount ?? 0) >= TOP_MIN_REVIEWS)
+    .sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name))
+    .slice(0, TOP_PICKS);
+}
+
+function TopPicks({ venues }: { venues: ListingVenue[] }) {
+  if (venues.length < 3) return null;
+  return (
+    <section className="border-b border-hfi-hair px-7 py-[30px] max-[640px]:px-5 max-[640px]:py-6" aria-labelledby="top-picks">
+      <div className="mx-auto max-w-[1180px]">
+        <h2 id="top-picks" className="font-display text-[20px] font-extrabold leading-[1.15] tracking-[-.6px] [font-variation-settings:'opsz'_28]">
+          Top {venues.length} by Google rating
+        </h2>
+        <p className="mt-1.5 text-[12.5px] text-hfi-t3">Rating weighted by number of reviews. Places need 50+ reviews to qualify.</p>
+        <ol className="mt-4 grid gap-2.5">
+          {venues.map((v, i) => (
+            <li key={v.slug} className="flex items-baseline gap-3">
+              <span className="w-5 shrink-0 text-[13px] font-bold text-hfi-t3">{i + 1}.</span>
+              <span className="min-w-0 text-[14.5px] leading-[1.5]">
+                <Link href={urls.venue(v.slug)} className="font-bold text-hfi-ink underline-offset-2 hover:underline">
+                  {v.name}
+                </Link>
+                {v.area && <span className="text-hfi-t3">, {v.area.name}</span>}
+                <span className="text-hfi-t2">
+                  {" "}
+                  · {v.rating!.toFixed(1)} from {v.reviewCount!.toLocaleString("en-GB")} reviews
+                </span>
+                {v.tagline && <span className="block text-[13px] text-hfi-t2">{v.tagline}</span>}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 export function ListingView(p: ListingPageProps) {
   const updated = lastUpdated(p.venues);
+  const picks = topPicks(p.venues);
   const related = relatedLinks(p.allVenues, p.path);
 
   // One pattern per art treatment used on the page; cards reference them by id.
@@ -139,6 +208,8 @@ export function ListingView(p: ListingPageProps) {
           </div>
         </div>
       </section>
+
+      <TopPicks venues={picks} />
 
       <ListingExplorer
         venues={p.venues}
