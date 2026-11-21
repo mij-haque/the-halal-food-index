@@ -267,6 +267,50 @@ export const COMBO_PAGES: ComboPage[] = [
     intro:
       "Featherstall Road North is the heart of Bengali food in Oldham. Kacchi Bari, named after its kacchi biryani, is at number 31, with Boithok Khana at 25, Grameen Khana at 67 and Bismillah Kitchen at 98. Old Dacca, one of the newer openings, is on Chadderton Way.",
   },
+  {
+    slug: "halal-desserts-bolton",
+    areaSlug: "bolton",
+    cuisineSlug: "desserts",
+    heading: "Halal Desserts in Bolton",
+    crumb: "Desserts",
+    chip: "Halal desserts in Bolton",
+    description: (n) => `${n} halal dessert shops, bakeries and cafes in Bolton, from hot cookie dough and waffles to mithai and cheesecake.`,
+    intro:
+      "Halliwell Road and St Helens Road carry most of Bolton's desserts. On Halliwell Road, Cube Desserts does hot cookie dough and waffles every Wednesday, with RF Cafe & Patisserie next door for layered cakes and afternoon tea. St Helens Road has The Belgian Waffle Company, Cafe Chico and Hamzah Sweet & Bakers for Pakistani mithai. Taste on High Street is a bakery that has been trading since 2012, and The Grumpy Baker on Wigan Road is known for its baked cheesecakes. Kaspa's and Little Dessert Shop complete the list.",
+  },
+  {
+    slug: "halal-grill-bolton",
+    areaSlug: "bolton",
+    cuisineSlug: "grill",
+    heading: "Halal Grills & Kebabs in Bolton",
+    crumb: "Grills & Kebabs",
+    chip: "Halal grills in Bolton",
+    description: (n) => `${n} halal grill and steak houses in Bolton, from lamb chops and T-bones to parmos and sizzlers.`,
+    intro:
+      "Bolton's grills are spread across town. Halliwell Road has Tribez, known for its T-bone steaks and lamb chops, and The Steakhouse Co, which mixes steaks with Indian and Asian dishes. On St Helens Road, Barakat Grill is the one for lamb chops and mixed grills. Hooyo's Spot on Derby Street pairs grills with Somali home cooking, Grillicious on Tonge Moor Road does parmos and sizzlers, while Lahori Taste on Bridge Street and Mr BBQ on Caroline Street round off the list.",
+  },
+  {
+    slug: "halal-burgers-bolton",
+    areaSlug: "bolton",
+    cuisineSlug: "burgers",
+    heading: "Halal Burgers in Bolton",
+    crumb: "Burgers",
+    chip: "Halal burgers in Bolton",
+    description: (n) => `${n} halal burger places in Bolton, from smash burgers and hot dip burgers to late-night takeaways.`,
+    intro:
+      "Derby Street has two of Bolton's burger spots: Players, with its Classico Smash and hot dip burgers, and Kings Castle, which stays open until nearly 3am on Fridays. Grillicious on Tonge Moor Road serves burgers alongside its parmos, Mr BBQ is on Caroline Street, and Side Street is out on Chorley Old Road.",
+  },
+  {
+    slug: "halal-burgers-stockport",
+    areaSlug: "stockport",
+    cuisineSlug: "burgers",
+    heading: "Halal Burgers in Stockport",
+    crumb: "Burgers",
+    chip: "Halal burgers in Stockport",
+    description: (n) => `${n} halal burger places in Stockport, Gatley and Heald Green, from smash burgers to the Knockout Toastie.`,
+    intro:
+      "Gatley and Heald Green are where Stockport's burgers are. The Grubfellas in Gatley is best known for the Knockout Toastie, two smash patties between grilled cheese toasties, and Burgerism on Stonepail Road does smash burgers and wings. MLK Burgers cooks out of Brewch on Gatley Green. In Heald Green, Jims and Good Burger are both on Finney Lane, and Lucky's Diner is on Wellington Road South, nearer the town centre.",
+  },
 ];
 
 export function comboVenues(page: ComboPage, all: ListingVenue[]): ListingVenue[] {
