@@ -311,6 +311,83 @@ export const COMBO_PAGES: ComboPage[] = [
     intro:
       "Gatley and Heald Green are where Stockport's burgers are. The Grubfellas in Gatley is best known for the Knockout Toastie, two smash patties between grilled cheese toasties, and Burgerism on Stonepail Road does smash burgers and wings. MLK Burgers cooks out of Brewch on Gatley Green. In Heald Green, Jims and Good Burger are both on Finney Lane, and Lucky's Diner is on Wellington Road South, nearer the town centre.",
   },
+  {
+    slug: "halal-middle-eastern-rusholme",
+    areaSlug: "rusholme",
+    cuisineSlug: "middle-eastern",
+    heading: "Halal Middle Eastern Food on the Curry Mile, Rusholme",
+    crumb: "Middle Eastern",
+    chip: "Halal Middle Eastern in Rusholme",
+    description: (n) => `${n} halal Middle Eastern restaurants on the Curry Mile (Wilmslow Road, Rusholme), from Palestinian fatayer to Yemeni mandi.`,
+    intro:
+      "Wilmslow Road through Rusholme is as much Middle Eastern as South Asian these days. Jafra is always busy for Palestinian fatayer and musakhan, and Jaffa at number 185 is the long-running stop for shawarma and mezze. Hadramout on Walmer Street East is known for mandi, and Al Yemen Al Saeed opens at 8am for a Yemeni breakfast. Today Restaurant on Grandale Street does Iraqi shawarma with fresh samoon, Walnut covers Persian food and Cedar Bakery serves Arabic breakfasts. For something sweet, Mr. Knafah is round the corner on Dickenson Road.",
+  },
+  {
+    slug: "halal-indian-rusholme",
+    areaSlug: "rusholme",
+    cuisineSlug: "indian",
+    heading: "Halal Indian Restaurants on the Curry Mile, Rusholme",
+    crumb: "Indian",
+    chip: "Halal Indian in Rusholme",
+    description: (n) => `${n} halal Indian restaurants on the Curry Mile (Wilmslow Road, Rusholme), from family dining rooms to late-night curry houses.`,
+    intro:
+      "These are the curry houses the Curry Mile is named after. MyLahore at 14-18 Wilmslow Road is the big family choice, and Sanam, a sweet house and restaurant at 145-151, is one of the oldest names on the road. Al Jazeera is a long-running local favourite, and Chit 'n' Chaat does chaat and street snacks in a rickshaw-themed room. Mughli Charcoal Pit cooks Indian soul food over charcoal, and it is the one place here that serves alcohol. Saajan stays open until 4am, or 5am at weekends, for after a night out.",
+  },
+  {
+    slug: "halal-desserts-rusholme",
+    areaSlug: "rusholme",
+    cuisineSlug: "desserts",
+    heading: "Halal Desserts on the Curry Mile, Rusholme",
+    crumb: "Desserts",
+    chip: "Halal desserts in Rusholme",
+    description: (n) => `${n} halal dessert places on the Curry Mile (Wilmslow Road, Rusholme), with several open until midnight.`,
+    intro:
+      "Desserts keep the Curry Mile busy late into the evening. Haute Dolci and Heavenly Desserts sit side by side at 25-27 Wilmslow Road, the first known for its crunch cakes and the second for cookie dough, waffles and crepes, and both stay open until midnight. Sanam sells Asian sweets alongside its restaurant, and Jilani's mixes desserts with Pakistani food and burgers. Cake Box at number 231 is the place for an eggless celebration cake, and Mr. Knafah is a short walk off the main road on Dickenson Road.",
+  },
+  {
+    slug: "halal-pan-asian-trafford-centre",
+    areaSlug: "trafford-centre",
+    cuisineSlug: "pan-asian",
+    heading: "Halal Pan-Asian at the Trafford Centre",
+    crumb: "Pan-Asian",
+    chip: "Halal Pan-Asian at the Trafford Centre",
+    description: (n) => `${n} halal and partly halal Pan-Asian restaurants at the Trafford Centre, most of them in the Orient.`,
+    intro:
+      "Almost all of these are in the Orient, the Trafford Centre's food hall. Three are fully halal. Nichi upstairs crosses Peruvian cooking with Pan-Asian sushi, Chopstix does build-a-box noodles and rice with halal chicken, and Tru Street mixes Malaysian, Thai and Korean street food. Tampopo has a separate halal menu, so ask for it when you sit down. Hello Oriental, Thaikhun and East Street are only partly halal, and Hello Oriental also serves pork and alcohol, so read the halal note on each page before you order.",
+  },
+  {
+    slug: "halal-burgers-trafford",
+    areaSlug: "trafford",
+    cuisineSlug: "burgers",
+    heading: "Halal Burgers in Trafford",
+    crumb: "Burgers",
+    chip: "Halal burgers in Trafford",
+    description: (n) => `${n} halal burger places across Trafford, from Old Trafford to Sale and Urmston.`,
+    intro:
+      "Old Trafford has most of these. Luckys on Seymour Grove is open until 1am every day, MLK Burgers on Stretford Road opens at 5pm and is closed on Mondays, and Fries & Guys on Chester Road does burgers and loaded fries. Archie's at Trafford Palazzo adds shakes and waffles to the burgers. Further out, Burger Stop on School Road in Sale does smash burgers and fried chicken, and Rounders on Flixton Road in Urmston does burgers, wings and chicken strips.",
+  },
+  {
+    slug: "halal-burgers-longsight",
+    areaSlug: "longsight",
+    cuisineSlug: "burgers",
+    heading: "Halal Burgers in Longsight and Ardwick",
+    crumb: "Burgers",
+    chip: "Halal burgers in Longsight",
+    description: (n) => `${n} halal burger places in Longsight and Ardwick, mostly late-night delivery kitchens.`,
+    intro:
+      "Most of these are delivery and collection kitchens in Ardwick, so don't expect a table. So Famous is open until 4am every day for double and triple smash burgers, and The Scran Guys, on the same estate, runs until 2am from Thursday to Sunday. The Grubfellas at Ghost x Kitchens on Higher Ardwick is known for its Knockout Toastie, and 0161 Flamin Fusion is on the same road. Burger Stop cooks out of Encore Kitchen on Dark Lane, and Miami Crispy on Meldon Road does dipped chicken burgers.",
+  },
+  {
+    slug: "halal-desserts-didsbury",
+    areaSlug: "didsbury",
+    cuisineSlug: "desserts",
+    heading: "Halal Desserts in Didsbury",
+    crumb: "Desserts",
+    chip: "Halal desserts in Didsbury",
+    description: (n) => `${n} halal dessert places in Didsbury, West Didsbury and Northenden.`,
+    intro:
+      "Didsbury village has most of these, along Wilmslow Road. Turkish Sweet Centre does baklava and Turkish breakfasts, Cake Box at number 721 does eggless cakes, and La Chouquette is further along at 812A. Caramello on Whitechapel Street is better known for brunch but serves gelato too. Velvet Whisk is on Burton Road in West Didsbury, and Creamy Croissant, on Palatine Road in Northenden, is known for filled croissants, Dubai chocolate treats and shakes.",
+  },
 ];
 
 export function comboVenues(page: ComboPage, all: ListingVenue[]): ListingVenue[] {
