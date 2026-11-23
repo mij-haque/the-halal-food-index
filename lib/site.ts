@@ -15,7 +15,9 @@ export const SITE_NAME = "The Halal Food Index";
 export const SITE_URL = "https://thehalalfoodindex.co.uk";
 
 export const urls = {
-  home: () => "/",
+  // "/" redirects to the flagship until the homepage is built, so link straight
+  // to the flagship to avoid every page linking to a redirect.
+  home: () => "/halal-restaurants-manchester",
   venue: (slug: string) => `/${slug}`,
   flagship: () => "/halal-restaurants-manchester",
   area: (areaSlug: string) => `/halal-restaurants-${areaSlug}-manchester`,
