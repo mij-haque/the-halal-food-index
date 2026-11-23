@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     siteName: "The Halal Food Index",
     locale: "en_GB",
     type: "website",
+    images: [{ url: "/logo.png", width: 512, height: 512, alt: "The Halal Food Index" }],
   },
 };
 
